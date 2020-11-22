@@ -2,16 +2,14 @@ import * as React from 'react';
 import { StyleSheet } from "react-native";
 import { TextInput } from 'react-native-paper';
 
-const AddWordInput = () => {
-  const [text, setText] = React.useState('');
-
+const AddWordInput = ({ label, onChange, word }: any) => {
   return (
     <TextInput
       style={styles.input}
-      label="Source word"
-      value={text}
+      label={label}
+      value={word}
       mode="outlined"
-      onChangeText={text => setText(text)}
+      onChangeText={text => onChange(text)}
     />
   );
 };
