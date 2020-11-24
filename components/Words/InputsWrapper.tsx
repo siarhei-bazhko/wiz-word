@@ -4,10 +4,23 @@ import { View, StyleSheet } from "react-native";
 import AddWordInput from "./AddWordInput";
 import Button from "../Home/Button";
 
-export default class InputsWrapper extends React.Component {
+import { generateWordId } from "../../helpers";
+
+type WordState = {
+  id: number,
+  origin: string,
+  translation: string
+};
+
+type InputWrapperProps = {
+  onClick: Function
+}
+
+export default class InputsWrapper extends React.Component<InputWrapperProps, WordState> {
   constructor(props: any){
     super(props);
     this.state = {
+      id: generateWordId(),
       origin: "",
       translation: ""
     }

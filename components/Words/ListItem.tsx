@@ -1,8 +1,7 @@
 import * as React from 'react';
 import { List, Button } from 'react-native-paper';
 
-const ListItem = ({ id, origin, translation, deleteWord }: any) => {
-  console.log(id, origin);
+const ListItem: React.FC<{}> = ({ word: { id, origin, translation }, deleteWord}: any) => {
   return <List.Item
     title={translation}
     description={origin}
