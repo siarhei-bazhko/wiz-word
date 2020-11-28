@@ -5,42 +5,24 @@ import { List } from 'react-native-paper';
 
 import { ListItem, InputsWrapper } from "../components";
 
-import { addWordRequest } from "../actions/wordsAction"
+import { addWordRequest, addWordSuccess, deleteWordRequest } from "../actions/wordsAction"
 
-// type WordsProps = {
+import type { Word } from "../types/Word";
 
-// }
-
-type WordsState = {
-  words: { id: number, origin: string, translation: string}[]
+type WordsProps = {
+  words: Word[],
+  deleteWord: Function
 }
+class Words extends React.Component<WordsProps, Word[]> {
 
-class Words extends React.Component<any, WordsState> {
-
-  constructor(readonly props: {}) {
+  constructor(readonly props: WordsProps) {
     super(props);
-    // this.addWord = this.addWord.bind(this);
-    this.deleteWord = this.deleteWord.bind(this);
-  }
-
-  // addWord(newWordPair: any) {
-    // this.setState((state: WordsState) => ({
-    //   words: [newWordPair, ...state.words]
-    // }));
-
-  // }
-
-  deleteWord(id: number) {
-    const words = this.state.words.filter(word => word.id !== id);
-    this.setState({
-      words
-    })
   }
 
   render() {
     return (
         <ScrollView>
-          <InputsWrapper onClick={this.props.addWord}/>
+          <InputsWrapper />
           <List.Section>
             <List.Accordion
               title="School/University section"
@@ -49,9 +31,8 @@ class Words extends React.Component<any, WordsState> {
                 this.props.words.map(word => (
                   <ListItem
                    word={word}
-                   deleteWord={this.deleteWord}
-                  />
-                ))
+                   deleteWord={this.props.deleteWord}
+                  />))
               }
             </List.Accordion>
           </List.Section>
@@ -61,11 +42,14 @@ class Words extends React.Component<any, WordsState> {
 }
 
 const mapStateToProps = (state: any) => ({
-    words: state.words
+    words: state.words,
+    isWordAdding: state.isWordAdding
 })
 
 const mapDispatchToProps = (dispatch: Function) => ({
-  addWord: (newWordPair: any) => dispatch(addWordRequest(newWordPair))
+  deleteWord: (id: number) => {
+    dispatch(deleteWordRequest(id));
+  }
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Words)

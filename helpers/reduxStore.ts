@@ -3,6 +3,9 @@ import { createLogger } from "redux-logger";
 
 import { wordsReducer } from "../reducers";
 
+// TODO: make map instead of array
+
+
 const INIT_STATE = {
   words : [
         {
@@ -25,7 +28,8 @@ const INIT_STATE = {
           origin: "красивый",
           translation: "beautiful"
         },
-      ]
+      ],
+  isWordAdding: false
 }
 
 const store = createStore(wordsReducer, INIT_STATE, applyMiddleware(createLogger()));

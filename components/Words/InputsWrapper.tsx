@@ -1,32 +1,31 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { View, StyleSheet } from "react-native";
 
 import AddWordInput from "./AddWordInput";
 import Button from "../Home/Button";
 
 import { generateWordId } from "../../helpers";
+import { addWordRequest, addWordSuccess } from '../../actions/wordsAction';
+import type { Word } from "../../types/Word";
 
-type WordState = {
-  id: number,
-  origin: string,
-  translation: string
-};
 
 type InputWrapperProps = {
-  onClick: Function
+  addWord: Function
 }
 
-export default class InputsWrapper extends React.Component<InputWrapperProps, WordState> {
+class InputsWrapper extends React.Component<InputWrapperProps, Word> {
   constructor(props: any){
     super(props);
-    this.state = {
-      id: generateWordId(),
-      origin: "",
-      translation: ""
-    }
+      this.state = {
+        id: generateWordId(),
+        origin: "",
+        translation: ""
+      }
 
     this.updateOriginInput = this.updateOriginInput.bind(this);
     this.updateTranslationInput = this.updateTranslationInput.bind(this);
+    this.addWord = this.addWord.bind(this);
   }
 
   updateOriginInput(origin: string) {
@@ -41,7 +40,17 @@ export default class InputsWrapper extends React.Component<InputWrapperProps, Wo
     })
   }
 
+  addWord(word: Word) {
+    this.props.addWord(word);
+    this.setState({
+      id: generateWordId(),
+      origin: "",
+      translation: ""
+    })
+  }
+
   render() {
+    const disabled = !this.state.origin || !this.state.translation
     return (
       <View  >
         <View style={styles.linesWrapper}>
@@ -50,7 +59,7 @@ export default class InputsWrapper extends React.Component<InputWrapperProps, Wo
         </View>
         <View style={styles.buttonWrapper}>
           <AddWordInput label="Translation" onChange={this.updateTranslationInput} word={this.state.translation}/>
-          <Button alignmentStyle={styles.buttonAlignment} buttonTitle="Add" iconType="check" fn={this.props.onClick} args={this.state}/>
+          <Button alignmentStyle={styles.buttonAlignment} buttonTitle="Add" iconType="check" fn={this.addWord} args={this.state} disabled={disabled}/>
         </View>
       </View>
     );
@@ -69,3 +78,12 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   }
 });
+
+const mapDispatchToProps = (dispatch: Function) => ({
+  addWord: (newWordPair: any) => {
+    dispatch(addWordRequest(newWordPair));
+    dispatch(addWordSuccess());
+  }
+})
+
+export default connect(null, mapDispatchToProps)(InputsWrapper)
