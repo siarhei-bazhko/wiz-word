@@ -41,6 +41,8 @@ class InputsWrapper extends React.Component<InputWrapperProps, Word> {
   }
 
   addWord(word: Word) {
+    word.origin = word.origin.toLowerCase();
+    word.translation = word.translation.toLowerCase();
     this.props.addWord(word);
     this.setState({
       id: generateWordId(),

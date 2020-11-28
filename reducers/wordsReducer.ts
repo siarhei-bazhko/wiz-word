@@ -7,10 +7,10 @@ const deleteWord = (id: number, state) => (state.words.filter(word => word.id !=
 const wordsReducer = (state = { words: []}, action: any) => {
   switch (action.type) {
     case wordsConstants.ADD_WORD_REQUEST:
-      return { words: [...state.words, action.word], isWordAdding: action.isWordAdding };
+      return { ...state, words: [...state.words, action.word], isWordAdding: action.isWordAdding };
 
     case wordsConstants.ADD_WORD_SUCCESS:
-      return Object.assign(state, { isWordAdding: action.isWordAdding });
+      return { ...state, isWordAdding: action.isWordAdding };
 
     case wordsConstants.DELETE_WORD_REQUEST:
       return { ...state, words: deleteWord(action.id, state), }

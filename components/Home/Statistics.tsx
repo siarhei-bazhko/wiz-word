@@ -4,15 +4,8 @@ import { View, Text, StyleSheet } from "react-native";
 import { connect } from "react-redux";
 
 
-class Statistics extends React.Component {
-
-  constructor(props) {
-    super(props)
-  }
-
-  render() {
-    return (
-    <Surface style={styles.surface}>
+export default function Statistics({ wordCount, successRate }) {
+  return <Surface style={styles.surface}>
         <Headline style={styles.headline}>
           Statistics
         </Headline>
@@ -26,20 +19,17 @@ class Statistics extends React.Component {
             <View>
               <Subheading style={styles.wordCount}>Word count</Subheading>
               <Divider />
-              <Text style={styles.wordNumbers}>{this.props.wordCount}</Text>
+              <Text style={styles.wordNumbers}>{wordCount}</Text>
             </View>
             <View>
               <Subheading>Success Rate</Subheading>
               <Divider />
-              <Text style={styles.successNumbers}>{this.props.successRate}%</Text>
+              <Text style={styles.successNumbers}>{successRate}%</Text>
             </View>
           </View>
         </View>
     </Surface>
-  )
-  }
 }
-
 const styles = StyleSheet.create({
   successNumbers: {
     color: "red",
@@ -85,10 +75,3 @@ const styles = StyleSheet.create({
 });
 
 
-const mapStateToProps = (state: any) => ({
-  wordCount: state.words.length,
-  successRate: state.successRate
-})
-
-
-export default connect(mapStateToProps, null)(Statistics);

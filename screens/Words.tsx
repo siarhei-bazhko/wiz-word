@@ -28,8 +28,9 @@ class Words extends React.Component<WordsProps, Word[]> {
               title="School/University section"
               left={props => <List.Icon {...props} icon="folder" />}>
               {
-                this.props.words.map(word => (
+                this.props.words.map((word, index) => (
                   <ListItem
+                   key={index}
                    word={word}
                    deleteWord={this.props.deleteWord}
                   />))

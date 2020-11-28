@@ -1,15 +1,15 @@
 import React from "react";
-import { Surface, Card, Title, Paragraph } from 'react-native-paper';
+import { Card, Title, Paragraph } from 'react-native-paper';
 import { StyleSheet } from 'react-native';
 
 
-export default function WordDaily() {
+export default function WordDaily({ dailyWord }) {
   return (
       <Card style={styles.card}>
           <Card.Title title="Word of the day:" />
         <Card.Content >
-          <Title >To Work</Title>
-          <Paragraph >Работать</Paragraph>
+          <Title >{dailyWord.translation}</Title>
+          <Paragraph >{dailyWord.origin}</Paragraph>
         </Card.Content>
       </Card>
   );

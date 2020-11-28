@@ -7,4 +7,9 @@ const generateWordId : () => number =
 const randomWord : (listSize: number) => number =
   () => (Math.random() * NUMBER) % listSize;
 
-export  { generateWordId, randomWord };
+
+const daysIntoYear = (date: Date) => {
+    return (Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) - Date.UTC(date.getFullYear(), 0, 0)) / 24 / 60 / 60 / 1000;
+}
+
+export  { generateWordId, randomWord, daysIntoYear};
