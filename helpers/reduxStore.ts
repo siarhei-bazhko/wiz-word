@@ -29,10 +29,10 @@ const INIT_STATE = {
           translation: "beautiful"
         },
       ],
-  isWordAdding: false
+  isWordAdding: false,
+  successRate: 0
 }
 
 const store = createStore(wordsReducer, INIT_STATE, applyMiddleware(createLogger()));
-console.log(store.getState())
 
 export default store;

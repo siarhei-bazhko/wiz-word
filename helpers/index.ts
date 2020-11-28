@@ -1,5 +1,5 @@
-import generateWordId from "./helpers";
+import { generateWordId, randomWord } from "./helpers";
 import store from "./reduxStore";
 
 
-export { store, generateWordId }
+export { store, generateWordId, randomWord }

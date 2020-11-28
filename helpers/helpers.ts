@@ -1,4 +1,10 @@
-const generateWordId : () => number =
-  () => (Math.floor(Math.random() * 1000000));
+const NUMBER = 1000000;
 
-export default generateWordId;
+const generateWordId : () => number =
+  () => (Math.floor(Math.random() * NUMBER));
+
+
+const randomWord : (listSize: number) => number =
+  () => (Math.random() * NUMBER) % listSize;
+
+export  { generateWordId, randomWord };

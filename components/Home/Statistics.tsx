@@ -1,11 +1,18 @@
 import React from "react";
 import { Surface, Subheading, Headline, Divider, ProgressBar, Colors } from 'react-native-paper';
 import { View, Text, StyleSheet } from "react-native";
+import { connect } from "react-redux";
 
 
-export default function Statistics() {
-  return (
-   <Surface style={styles.surface}>
+class Statistics extends React.Component {
+
+  constructor(props) {
+    super(props)
+  }
+
+  render() {
+    return (
+    <Surface style={styles.surface}>
         <Headline style={styles.headline}>
           Statistics
         </Headline>
@@ -19,17 +26,18 @@ export default function Statistics() {
             <View>
               <Subheading style={styles.wordCount}>Word count</Subheading>
               <Divider />
-              <Text style={styles.wordNumbers}>228</Text>
+              <Text style={styles.wordNumbers}>{this.props.wordCount}</Text>
             </View>
             <View>
               <Subheading>Success Rate</Subheading>
               <Divider />
-              <Text style={styles.successNumbers}>49%</Text>
+              <Text style={styles.successNumbers}>{this.props.successRate}%</Text>
             </View>
           </View>
         </View>
     </Surface>
-  );
+  )
+  }
 }
 
 const styles = StyleSheet.create({
@@ -75,3 +83,12 @@ const styles = StyleSheet.create({
 
   }
 });
+
+
+const mapStateToProps = (state: any) => ({
+  wordCount: state.words.length,
+  successRate: state.successRate
+})
+
+
+export default connect(mapStateToProps, null)(Statistics);

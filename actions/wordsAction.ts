@@ -36,8 +36,12 @@ const getWordsSuccess = () => ({ type: wordsConstants.GET_WORDS_SUCCESS })
 
 const getWordsFailure = () => ({ type: wordsConstants.GET_WORDS_FAILURE })
 
+const updateStatsRequest = (successRate : number) => (
+  { type: wordsConstants.UPDATE_STATS_REQUEST, successRate })
+
 export {
   addWordRequest, addWordSuccess, addWordFailure,
   deleteWordRequest, deleteWordSuccess, deleteWordFailure,
-  getWordsRequest, getWordsSuccess, getWordsFailure
+  getWordsRequest, getWordsSuccess, getWordsFailure,
+  updateStatsRequest
 }

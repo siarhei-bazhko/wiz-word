@@ -13,8 +13,10 @@ const wordsReducer = (state = { words: []}, action: any) => {
       return Object.assign(state, { isWordAdding: action.isWordAdding });
 
     case wordsConstants.DELETE_WORD_REQUEST:
-      return { words: deleteWord(action.id, state)}
+      return { ...state, words: deleteWord(action.id, state), }
 
+    case wordsConstants.UPDATE_STATS_REQUEST:
+      return { ...state, successRate: action.successRate };
     default:
       return state;
   }
