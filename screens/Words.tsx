@@ -5,7 +5,7 @@ import { List } from 'react-native-paper';
 
 import { ListItem, InputsWrapper } from "../components";
 
-import { addWordRequest, addWordSuccess, deleteWordRequest } from "../actions/wordsAction"
+import { deleteWordRequest } from "../actions/wordsAction"
 
 import type { Word } from "../types/Word";
 
