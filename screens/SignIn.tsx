@@ -1,17 +1,20 @@
-import React from "react"
+import { Component, useEffect } from "react"
 import { View, Text, StyleSheet } from "react-native";
 import { TextInput } from "react-native-paper";
 import { connect } from "react-redux";
 
-class SignIn extends React.Component {
+class SignIn extends Component {
   constructor(props: any) {
     super(props)
+    this.state={
+      val: ""
+    }
   }
 
   render() {
     return (
       <View>
-        <Text>SignIn</Text>
+        <Text>{this.state.val}</Text>
         <TextInput
           style={styles.input}
           label={"Username"}

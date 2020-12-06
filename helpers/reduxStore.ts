@@ -8,7 +8,7 @@ import { wordsReducer } from "../reducers";
 
 const INIT_STATE = {
   user : {
-    userToken: null
+    userToken: 1010
   },
   words : [
         {

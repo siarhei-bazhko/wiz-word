@@ -49,7 +49,10 @@ const styles = StyleSheet.create(
 const mapStateToProps = (state: any) => ({
   wordCount: state.words.length,
   successRate: state.successRate,
-  dailyWord: state.words[daysIntoYear(new Date) % state.words.length]
+  dailyWord: state.words.length
+                ? state.words[daysIntoYear(new Date) % state.words.length]
+                : { translation: "Sorry, you havent added anything yet",
+                    origin: "Please, add some words"}
 })
 
 

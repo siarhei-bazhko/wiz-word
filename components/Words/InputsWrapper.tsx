@@ -6,8 +6,9 @@ import AddWordInput from "./AddWordInput";
 import Button from "../Home/Button";
 
 import { generateWordId } from "../../helpers";
-import { addWordRequest, addWordSuccess } from '../../actions/wordsAction';
+import { addWordFailure, addWordRequest, addWordSuccess, getWordsFailure, getWordsRequest, getWordsSuccess } from '../../actions/wordsAction';
 import type { Word } from "../../types/Word";
+import { addFlashcard, getFlashcards } from '../../api/firebase';
 
 
 type InputWrapperProps = {
@@ -83,8 +84,22 @@ const styles = StyleSheet.create({
 
 const mapDispatchToProps = (dispatch: Function) => ({
   addWord: (newWordPair: any) => {
-    dispatch(addWordRequest(newWordPair));
-    dispatch(addWordSuccess());
+    addWordRequest();
+    addFlashcard(newWordPair).then(res => {
+      dispatch(addWordSuccess(res.msg));
+    }).catch(err => {
+      dispatch(addWordFailure(err.msg));
+    })
+    .then(() => {
+      dispatch(getWordsRequest());
+      return getFlashcards();
+    })
+    .then(flashcards => {
+      dispatch(getWordsSuccess(flashcards));
+    })
+    .catch(err => {
+      dispatch(getWordsFailure(err.msg));
+    });
   }
 })
 

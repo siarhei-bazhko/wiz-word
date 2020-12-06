@@ -1,4 +1,5 @@
 import wordsConstants from "../contants/wordsConstants"
+import { Word } from "../types/Word"
 
 // ----------------
 // get words
@@ -7,34 +8,34 @@ import wordsConstants from "../contants/wordsConstants"
 // delete word
 // ----------------
 
-const addWordRequest = (word: any) =>
+const addWordRequest = () =>
   ({
     type: wordsConstants.ADD_WORD_REQUEST,
-    word,
     isWordAdding: true
   })
 
-const addWordSuccess = () =>
+const addWordSuccess = (msg: string) =>
   ({
     type: wordsConstants.ADD_WORD_SUCCESS,
-    isWordAdding: false
+    isWordAdding: false,
+    msg
   })
 
-const addWordFailure = () => ({ type: wordsConstants.ADD_WORD_FAILURE })
+const addWordFailure = (err: string) => ({ type: wordsConstants.ADD_WORD_FAILURE, err })
 
 
-const deleteWordRequest = (id: number) => ({ type: wordsConstants.DELETE_WORD_REQUEST, id})
+const deleteWordRequest = () => ({ type: wordsConstants.DELETE_WORD_REQUEST })
 
-const deleteWordSuccess = () => ({ type: wordsConstants.DELETE_WORD_SUCCESS })
+const deleteWordSuccess = (msg: string) => ({ type: wordsConstants.DELETE_WORD_SUCCESS, msg })
 
-const deleteWordFailure = () => ({ type: wordsConstants.DELETE_WORD_FAILURE })
+const deleteWordFailure = (err: string) => ({ type: wordsConstants.DELETE_WORD_FAILURE, err })
 
 
 const getWordsRequest = () => ({ type: wordsConstants.GET_WORDS_REQUEST })
 
-const getWordsSuccess = () => ({ type: wordsConstants.GET_WORDS_SUCCESS })
+const getWordsSuccess = (words: Word[]) => ({ type: wordsConstants.GET_WORDS_SUCCESS, words })
 
-const getWordsFailure = () => ({ type: wordsConstants.GET_WORDS_FAILURE })
+const getWordsFailure = (err: string) => ({ type: wordsConstants.GET_WORDS_FAILURE, err })
 
 const updateStatsRequest = (successRate : number) => (
   { type: wordsConstants.UPDATE_STATS_REQUEST, successRate })
