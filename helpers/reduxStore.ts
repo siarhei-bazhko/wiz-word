@@ -1,14 +1,12 @@
-import { createStore, applyMiddleware } from "redux";
+import { createStore, applyMiddleware, combineReducers } from "redux";
 import { createLogger } from "redux-logger";
 
-import { wordsReducer } from "../reducers";
-
-// TODO: make map instead of array
-
+import { wordsReducer, authReducer } from "../reducers";
 
 const INIT_STATE = {
   user : {
-    userToken: 1010
+    userToken: null,
+    authMessage: ""
   },
   words : [
         {
@@ -36,6 +34,6 @@ const INIT_STATE = {
   successRate: 0
 }
 
-const store = createStore(wordsReducer, INIT_STATE, applyMiddleware(createLogger()));
+const store = createStore(combineReducers({  auth: authReducer, words: wordsReducer }), {}, applyMiddleware(createLogger()));
 
 export default store;

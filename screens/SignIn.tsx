@@ -1,34 +1,57 @@
-import { Component, useEffect } from "react"
+import firebase from "../config/firebase";
+import React from "react"
 import { View, Text, StyleSheet } from "react-native";
-import { TextInput } from "react-native-paper";
 import { connect } from "react-redux";
+import { signInFailure, signInRequest, signInSuccess } from "../actions/authenticationActions";
+import { TextInput } from "react-native-paper";
+import { Button } from "../components";
 
-class SignIn extends Component {
+class SignIn extends React.Component {
   constructor(props: any) {
     super(props)
     this.state={
-      val: ""
+      username: "",
+      password: ""
     }
+    this.handleUsername = this.handleUsername.bind(this);
+    this.handlePassword = this.handlePassword.bind(this);
+  }
+
+  handleUsername(username: string) {
+    this.setState({
+      username
+    })
+  }
+
+  handlePassword(password: string) {
+    this.setState({
+      password
+    })
   }
 
   render() {
     return (
       <View>
-        <Text>{this.state.val}</Text>
+        <View >
+          <Text style={styles.info}>Message: {this.props.message}</Text>
+          <Text style={styles.info}>Pending Auth: {this.props.pendingAuth.toString()}</Text>
+          <Text style={styles.info}>userToken: {this.props.userToken}</Text>
+        </View>
         <TextInput
           style={styles.input}
           label={"Username"}
-          value={"word"}
           mode="outlined"
-          onChangeText={text => onChange(text)}
+          onChangeText={text => this.handleUsername(text)}
         />
         <TextInput
           style={styles.input}
           label={"Password"}
-          value={"word"}
           mode="outlined"
-          onChangeText={text => onChange(text)}
+          onChangeText={text => this.handlePassword(text)}
         />
+        <Button alignmentStyle={styles.buttonAlignment} buttonTitle="SIGN IN" iconType="sign-direction" fn={this.props.handleSignIn} args={this.state}/>
+
+        <Button alignmentStyle={styles.buttonAlignment} buttonTitle="SIGN UP" iconType="exit-run" fn={ () => this.props.navigation.navigate("SignUp")} args={this.state}/>
       </View>
     );
   }
@@ -39,7 +62,35 @@ const styles = StyleSheet.create({
   input: {
     marginHorizontal: 20,
     marginTop: 10
+  },
+  buttonAlignment: {
+    marginTop: 10
+  },
+  info: {
+    fontSize: 16,
+    color: 'red'
   }
 });
 
-export default connect(null, null)(SignIn)
+const mapStateToProps = ({auth}: any) => ({
+    message: auth?.user?.authMessage,
+    pendingAuth: auth?.user?.pendingAuth,
+    userToken: auth?.user?.userToken
+})
+
+const mapDispatchToProps = (dispatch: Function) => ({
+  handleSignIn: (credentials: { username: string, password: string}) => {
+    dispatch(signInRequest());
+    firebase.auth()
+      .signInWithEmailAndPassword(credentials.username, credentials.password)
+      .then((res)=>{
+        dispatch(signInSuccess(res.user.uid))
+      })
+      .catch((err)=> {
+        dispatch(signInFailure(err))
+      });
+  }
+
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(SignIn)

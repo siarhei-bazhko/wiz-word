@@ -8,7 +8,7 @@ import Button from "../Home/Button";
 import { generateWordId } from "../../helpers";
 import { addWordFailure, addWordRequest, addWordSuccess, getWordsFailure, getWordsRequest, getWordsSuccess } from '../../actions/wordsAction';
 import type { Word } from "../../types/Word";
-import { addFlashcard, getFlashcards } from '../../api/firebase';
+import api from '../../api/firebase';
 
 
 type InputWrapperProps = {
@@ -44,7 +44,7 @@ class InputsWrapper extends React.Component<InputWrapperProps, Word> {
   addWord(word: Word) {
     word.origin = word.origin.toLowerCase();
     word.translation = word.translation.toLowerCase();
-    this.props.addWord(word);
+    this.props.addWord(word, this.props.userToken);
     this.setState({
       id: generateWordId(),
       origin: "",
@@ -82,17 +82,22 @@ const styles = StyleSheet.create({
   }
 });
 
+const mapStateToProps = ({auth}: any) => ({
+    userToken: auth?.user?.userToken
+})
+
 const mapDispatchToProps = (dispatch: Function) => ({
-  addWord: (newWordPair: any) => {
+  addWord: (newWordPair: {}, userToken: string) => {
+    const call = api(userToken);
     addWordRequest();
-    addFlashcard(newWordPair).then(res => {
+    call.addFlashcard(newWordPair).then(res => {
       dispatch(addWordSuccess(res.msg));
     }).catch(err => {
       dispatch(addWordFailure(err.msg));
     })
     .then(() => {
       dispatch(getWordsRequest());
-      return getFlashcards();
+      return call.getFlashcards();
     })
     .then(flashcards => {
       dispatch(getWordsSuccess(flashcards));
@@ -103,4 +108,4 @@ const mapDispatchToProps = (dispatch: Function) => ({
   }
 })
 
-export default connect(null, mapDispatchToProps)(InputsWrapper)
+export default connect(mapStateToProps, mapDispatchToProps)(InputsWrapper)

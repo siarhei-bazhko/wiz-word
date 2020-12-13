@@ -1,5 +1,7 @@
-const firebase = require("firebase");
-require("firebase/firestore");
+import 'expo-firestore-offline-persistence'
+import firebase from "firebase/app";
+import "firebase/auth";
+import "firebase/firestore";
 
 
   const firebaseConfig = {
@@ -15,4 +17,4 @@ require("firebase/firestore");
 
   firebase.initializeApp(firebaseConfig);
 
-export default firebase;
+  export default firebase;

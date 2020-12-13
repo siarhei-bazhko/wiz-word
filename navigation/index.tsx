@@ -3,7 +3,7 @@ import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import { NavigationContainer } from "@react-navigation/native";
 
-import { Home, Words, Quiz, SignIn, SignUp } from "../screens";
+import { Home, Words, Quiz, SignIn, SignUp, Settings } from "../screens";
 import Titles from "../contants/headers";
 import { connect } from "react-redux";
 
@@ -13,20 +13,20 @@ function RootNavigator({ userToken }) {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-      { userToken == null ? (
+      { userToken === null ? (
         <>
           <Stack.Screen
             name="SignIn"
             component={SignIn}
             options={{
-              title: 'Sign in',
+              title: 'Sign In',
             }}
           />
           <Stack.Screen
             name="SignUp"
             component={SignUp}
             options={{
-              title: 'Sign up',
+              title: 'Sign Up',
             }}
           />
         </>
@@ -47,7 +47,11 @@ function RootNavigator({ userToken }) {
             component={Quiz}
             options={{ title: Titles.QUIZ_TITLE }}
           />
-        {/* <Stack.Screen name="Settings" component={Home} /> */}
+        <Stack.Screen
+          name="Settings"
+          component={ Settings }
+          options={{ title: Titles.SETTINGS_TITLE }}
+        />
         {/* <Stack.Screen name="Share" component={Home} /> */}
         </>
       )}
@@ -57,8 +61,8 @@ function RootNavigator({ userToken }) {
   );
 }
 
-const mapStateToProps = ({ user : { userToken }} : any) => ({
-  userToken
+const mapStateToProps = ({auth}: any) => ({
+    userToken: auth?.user?.userToken
 })
 
 export default connect(mapStateToProps, null)(RootNavigator)

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { connect } from "react-redux";
 import { WordDaily, Button, Statistics } from "../components";
 import { daysIntoYear } from "../helpers/helpers";
@@ -46,11 +46,11 @@ const styles = StyleSheet.create(
 
 
 
-const mapStateToProps = (state: any) => ({
-  wordCount: state.words.length,
-  successRate: state.successRate,
-  dailyWord: state.words.length
-                ? state.words[daysIntoYear(new Date) % state.words.length]
+const mapStateToProps = ({ words }: any) => ({
+  wordCount: words?.words?.length,
+  successRate: words?.successRate,
+  dailyWord: words?.words?.length
+                ? words.words[daysIntoYear(new Date) % words.words.length]
                 : { translation: "Sorry, you havent added anything yet",
                     origin: "Please, add some words"}
 })

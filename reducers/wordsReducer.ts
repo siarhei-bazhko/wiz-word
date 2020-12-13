@@ -1,7 +1,7 @@
 import wordsConstants from "../contants/wordsConstants"
 
-
-const wordsReducer = (state = { words: []}, action: any) => {
+const initState = { words: [], isWordsFetching: false, isWordAdding: false, msg: "",  successRate: 0 }
+const wordsReducer = (state = initState, action: any) => {
   switch (action.type) {
     case wordsConstants.ADD_WORD_REQUEST:
       return { ...state, isWordAdding: action.isWordAdding };
@@ -18,8 +18,6 @@ const wordsReducer = (state = { words: []}, action: any) => {
 
     case wordsConstants.GET_WORDS_SUCCESS:
       // TODO: add to action isWordsFetching
-      console.log("action.words");
-      console.log(action.words);
       return { ...state, words: action.words, isWordsFetching: false };
 
     case wordsConstants.GET_WORDS_FAILURE:

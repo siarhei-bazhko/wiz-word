@@ -1,4 +1,5 @@
 import wordsReducer from "./wordsReducer"
+import authReducer from "./authReducer"
 
 
-export { wordsReducer }
+export { wordsReducer, authReducer }

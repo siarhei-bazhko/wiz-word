@@ -1,10 +1,8 @@
 import React from "react";
-import { View, Text, StyleSheet, Systrace } from "react-native";
-import { Button, Card, DataTable, List, Paragraph, TextInput, Title } from "react-native-paper";
+import { View, StyleSheet } from "react-native";
+import { Button, Card, DataTable, Paragraph, TextInput, Title } from "react-native-paper";
 import { connect } from "react-redux";
 import { updateStatsRequest } from "../actions/wordsAction";
-
-import type { Word } from "../types/Word"
 
  class Quiz extends React.Component {
 
@@ -146,8 +144,8 @@ const styles = StyleSheet.create({
   }
 });
 
-const mapStateToProps = (state: any) => ({
-    words: state.words
+const mapStateToProps = ({words}: any) => ({
+    words: words.words
 })
 
 const mapDispatchToProps = (dispatch: Function) => ({
