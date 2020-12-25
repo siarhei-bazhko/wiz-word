@@ -9,11 +9,14 @@
   },
   "dependencies": {
     "@react-native-community/masked-view": "0.1.10",
+    "@react-native-community/netinfo": "5.9.6",
     "@react-navigation/native": "^5.8.10",
     "@react-navigation/stack": "^5.12.7",
     "expo": "~39.0.2",
+    "expo-battery": "~3.0.0",
     "expo-firestore-offline-persistence": "^0.1.0",
     "expo-google-sign-in": "~8.3.0",
+    "expo-network": "~2.3.0",
     "expo-sqlite": "~8.4.0",
     "expo-status-bar": "~1.0.2",
     "firebase": "7.9.0",
@@ -28,7 +31,8 @@
     "react-native-screens": "~2.10.1",
     "react-native-web": "~0.13.12",
     "react-redux": "^7.2.2",
-    "redux": "^4.0.5"
+    "redux": "^4.0.5",
+    "redux-persist": "^6.0.0"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0",

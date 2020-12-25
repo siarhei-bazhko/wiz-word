@@ -2,7 +2,7 @@ import firebase from "../config/firebase";
 import { Word } from "../types/Word";
 
 const fs = firebase.firestore();
-fs.enablePersistence();
+// fs.enablePersistence();
 
 function api(userId: string) {
   async function addFlashcard(flashcard: Word) {
@@ -10,8 +10,8 @@ function api(userId: string) {
       console.log("addFlashcard");
       console.log(`users/${userId}/flashcards`);
 
-      await fs.collection("users").doc(userId).collection("flashcards").add(flashcard);
-      return { msg: "Word has been added to db!"}
+      const docRef = await fs.collection("users").doc(userId).collection("flashcards").add(flashcard);
+      return { id: docRef.id, msg: "Word has been added to db!"}
     } catch (err) {
       // TODO: handle
       console.log(err);
@@ -24,9 +24,8 @@ function api(userId: string) {
     try {
       console.log(`users/${userId}/flashcards`);
       const snapshot = await fs.collection("users").doc(userId).collection("flashcards").get();
-      snapshot.forEach((doc: { data: () => any; }) =>
-      {
-        flashcards.push(doc.data());
+      snapshot.forEach((doc) => {
+        flashcards.push({ ...doc.data(), refId: doc.id});
       });
       return flashcards;
     } catch (err) {
@@ -39,19 +38,50 @@ function api(userId: string) {
 
   async function deleteFlashcard(id: number) {
     try {
-      const flashcardsSnapshot = await fs.collection("users").doc(userId).collection("flashcards").where("id", "==", id).get();
-      flashcardsSnapshot.forEach((doc: { ref: { delete: () => any; }; }) =>(doc.ref.delete()));
-      return { msg: `Successfully deleted word with id ${id}`}
+      const flashcardsSnapshot = await fs.collection("users").doc(userId).collection("flashcards")
+      .doc(id).delete();
+      return { msg: `Successfully deleted word with id ${id}: ${flashcardsSnapshot}`}
     } catch (error) {
       // TODO: handle
       console.log(error);
       return  Promise.reject({ msg: "Couldn't delete the word :("})
     }
   }
-  return { addFlashcard, getFlashcards, deleteFlashcard };
+
+  async function syncOfflineWithServer(addedArray:Word[], deletedArray) {
+    try {
+      const batch = fs.batch();
+      console.log(JSON.stringify(deletedArray));
+      console.log(JSON.stringify(addedArray));
+
+      deletedArray.forEach(id => {
+        const ref = fs.collection("users").doc(userId).collection("flashcards").doc(id)
+        batch.delete(ref);
+      });
+
+      console.log("longgg");
+
+      addedArray.forEach(doc => {
+      console.log("doc2");
+
+      const ref = fs.collection("users").doc(userId).collection("flashcards").doc();
+      batch.set(ref, doc)
+      })
+      const res = await batch.commit();
+      console.log("OK:" + res);
+
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  return { addFlashcard, getFlashcards, deleteFlashcard, syncOfflineWithServer };
 }
 
 export default api;
 
+export {
+  fs
+}
 
 

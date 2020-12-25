@@ -14,11 +14,12 @@ const addWordRequest = () =>
     isWordAdding: true
   })
 
-const addWordSuccess = (msg: string) =>
+const addWordSuccess = (msg: string, newWord: any) =>
   ({
     type: wordsConstants.ADD_WORD_SUCCESS,
     isWordAdding: false,
-    msg
+    msg,
+    newWord
   })
 
 const addWordFailure = (err: string) => ({ type: wordsConstants.ADD_WORD_FAILURE, err })
@@ -40,9 +41,72 @@ const getWordsFailure = (err: string) => ({ type: wordsConstants.GET_WORDS_FAILU
 const updateStatsRequest = (successRate : number) => (
   { type: wordsConstants.UPDATE_STATS_REQUEST, successRate })
 
+
+
+const offlineAddWord = (word: Word) => ({
+  type: wordsConstants.OFFLINE_ADD_WORD,
+  word : { ...word, sync: false},
+})
+
+const offlineGetWords = () => ({
+  type: wordsConstants.OFFLINE_GET_WORDS,
+})
+
+const offlineDeleteWord = (id: string) => ({
+  type: wordsConstants.OFFLINE_DELETE_WORD,
+  id
+})
+
+const copyLocalState = (localWords: Word[]) => ({
+  type: wordsConstants.COPY_LOCAL_STATE,
+  localWords
+})
+
+const syncOfflineStateWithServerRequest = () => ({
+  type: wordsConstants.SYNC_OFFLINE_STATE_REQUEST,
+  syncOfflineState: true,
+})
+
+const syncOfflineStateWithServerSuccess = () => ({
+  type: wordsConstants.SYNC_OFFLINE_STATE_SUCCESS,
+  syncOfflineState: false,
+
+})
+
+const syncOfflineStateWithServerFailure = () => ({
+  type: wordsConstants.SYNC_OFFLINE_STATE_FAILURE,
+  syncOfflineState: false,
+})
+
+const addToDeletedList = (id: string) => ({
+  type: wordsConstants.OFFLINE_ADD_TO_DELETED_LIST,
+  id
+})
+
+const addToAddedList = (word: Word) => ({
+  type: wordsConstants.OFFLINE_ADD_TO_ADDED_LIST,
+  word
+})
+
+const resetLists = () => ({
+  type: wordsConstants.RESET_LISTS,
+});
+
 export {
   addWordRequest, addWordSuccess, addWordFailure,
   deleteWordRequest, deleteWordSuccess, deleteWordFailure,
   getWordsRequest, getWordsSuccess, getWordsFailure,
-  updateStatsRequest
+  updateStatsRequest,
+
+  offlineAddWord,
+  offlineGetWords,
+  offlineDeleteWord,
+  copyLocalState,
+  syncOfflineStateWithServerRequest,
+  syncOfflineStateWithServerSuccess,
+  syncOfflineStateWithServerFailure,
+
+  addToDeletedList,
+  addToAddedList,
+  resetLists
 }

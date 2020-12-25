@@ -1,14 +1,11 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux"
 import { List } from 'react-native-paper';
-
-import { deleteWordFailure, deleteWordRequest, deleteWordSuccess, getWordsFailure, getWordsRequest, getWordsSuccess } from "../actions/wordsAction"
-
 import type { Word } from "../types/Word";
 import { ScrollView } from "react-native";
 import InputsWrapper from "../components/Words/InputsWrapper";
 import ListItem from "../components/Words/ListItem";
-import api from "../api/firebase";
+import { deleteFlashcard, getFlashcards } from "../adaptations/offline";
 
 type WordsProps = {
   userToken: string,
@@ -52,38 +49,24 @@ class Words extends React.Component<WordsProps, Word[]> {
   }
 }
 
-const mapStateToProps = (state: any) => ({
+const mapStateToProps = (state: any) => {
+  const localWords = state?.words?.words ? state.words.words : [];
+  const offlineWords = state.offline.words
+  const isOffline = state.situations.isOffline
+  return {
     userToken: state?.auth?.user?.userToken ? state.auth.user.userToken : null,
-    words: state?.words?.words ? state.words.words : [],
+    words: isOffline ? offlineWords : localWords,
     isWordAdding: state?.words?.isWordAdding ? state.words.isWordAdding : false
-})
+  }
+}
 
 const mapDispatchToProps = (dispatch: Function) => ({
   deleteWord: async (id: number, userToken: string) => {
-    const call = api(userToken);
-    dispatch(deleteWordRequest());
-    try {
-      const res = await call.deleteFlashcard(id)
-      dispatch(deleteWordSuccess(res.msg));
-    } catch (err) {
-      dispatch(deleteWordFailure(err.msg))
-    }
-
-    try {
-      dispatch(getWordsRequest());
-      const flashcards = await call.getFlashcards();
-      dispatch(getWordsSuccess(flashcards));
-    } catch (err) {
-      dispatch(getWordsFailure(err.msg));
-    }
+    await deleteFlashcard(dispatch, userToken, id)
 
   },
-  getWords: (userToken: string) => {
-    const call = api(userToken);
-    dispatch(getWordsRequest());
-    call.getFlashcards()
-      .then(flashcards => { dispatch(getWordsSuccess(flashcards)); })
-      .catch(err => { dispatch(getWordsFailure(err.msg));});
+  getWords: async (userToken: string) => {
+    await getFlashcards(dispatch, userToken)
   }
 })
 

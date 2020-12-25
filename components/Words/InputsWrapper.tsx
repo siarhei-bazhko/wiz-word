@@ -8,6 +8,7 @@ import Button from "../Home/Button";
 import { generateWordId } from "../../helpers";
 import { addWordFailure, addWordRequest, addWordSuccess, getWordsFailure, getWordsRequest, getWordsSuccess } from '../../actions/wordsAction';
 import type { Word } from "../../types/Word";
+import { addFlashcard, getFlashcards } from '../../adaptations/offline';
 import api from '../../api/firebase';
 
 
@@ -19,7 +20,7 @@ class InputsWrapper extends React.Component<InputWrapperProps, Word> {
   constructor(props: any){
     super(props);
       this.state = {
-        id: generateWordId(),
+        refId: generateWordId(),
         origin: "",
         translation: ""
       }
@@ -44,11 +45,12 @@ class InputsWrapper extends React.Component<InputWrapperProps, Word> {
   addWord(word: Word) {
     word.origin = word.origin.toLowerCase();
     word.translation = word.translation.toLowerCase();
+    word.timestamp = Date.now();
     this.props.addWord(word, this.props.userToken);
     this.setState({
-      id: generateWordId(),
-      origin: "",
-      translation: ""
+      refId: generateWordId(),
+      // origin: "",
+      // translation: ""
     })
   }
 
@@ -87,24 +89,13 @@ const mapStateToProps = ({auth}: any) => ({
 })
 
 const mapDispatchToProps = (dispatch: Function) => ({
-  addWord: (newWordPair: {}, userToken: string) => {
-    const call = api(userToken);
-    addWordRequest();
-    call.addFlashcard(newWordPair).then(res => {
-      dispatch(addWordSuccess(res.msg));
-    }).catch(err => {
-      dispatch(addWordFailure(err.msg));
-    })
-    .then(() => {
-      dispatch(getWordsRequest());
-      return call.getFlashcards();
-    })
-    .then(flashcards => {
-      dispatch(getWordsSuccess(flashcards));
-    })
-    .catch(err => {
-      dispatch(getWordsFailure(err.msg));
-    });
+  addWord: (newWordPair: any, userToken: string) => {
+    /**adding word localy */
+
+    /**adding word remotely */
+
+    addFlashcard(dispatch, userToken, newWordPair);
+
   }
 })
 
