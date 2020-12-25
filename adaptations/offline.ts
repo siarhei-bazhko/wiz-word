@@ -17,13 +17,15 @@ import { NetworkSituation } from "../types/Adapation";
 // }
 
 function addFlashcard(dispatch: Function, userToken: string, newWordPair: Word) {
-  if(store.getState().situations.isOffline){
+  const situation = store.getState().situations.offline.network;
+
+  if(situation === NetworkSituation.OFFLINE){
     console.log("ADD: You are offline! So Nothing IS stored YET");
     dispatch(offlineAddWord(newWordPair))
     return
   }
 
-  if (!store.getState().situations.isOffline) {
+  if (situation === NetworkSituation.ONLINE) {
     const call = api(userToken);
     addWordRequest();
     call.addFlashcard(newWordPair)
@@ -52,8 +54,9 @@ function addFlashcard(dispatch: Function, userToken: string, newWordPair: Word) 
 }
 
 async function deleteFlashcard(dispatch: Function, userToken: string, id: string | number) {
+  const situation = store.getState().situations.offline.network;
 
-  if(store.getState().situations.isOffline){
+  if(situation === NetworkSituation.OFFLINE){
     console.log("DELETE: You are offline! So Nothing IS stored YET");
     console.log(id);
     dispatch(offlineDeleteWord(id))
@@ -62,7 +65,7 @@ async function deleteFlashcard(dispatch: Function, userToken: string, id: string
     return
   }
 
-  if (!store.getState().situations.isOffline) {
+  if (situation === NetworkSituation.ONLINE) {
   const call = api(userToken);
     dispatch(deleteWordRequest());
     try {
@@ -83,14 +86,15 @@ async function deleteFlashcard(dispatch: Function, userToken: string, id: string
 }
 
 function getFlashcards(dispatch: Function, userToken : string) {
-  if(store.getState().situations.isOffline){
+  const situation = store.getState().situations.offline.network;
+
+  if(situation === NetworkSituation.OFFLINE){
     console.log("GET:// You are offline! So Nothing IS stored YET");
     dispatch(offlineGetWords());
-
     return
   }
 
-  if (!store.getState().situations.isOffline) {
+  if (situation === NetworkSituation.ONLINE) {
     const call = api(userToken);
     dispatch(getWordsRequest());
     call.getFlashcards()

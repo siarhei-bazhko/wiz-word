@@ -1,23 +1,22 @@
 import adaptationConstants from "../contants/adaptationConstants"
-import { BatterySituation } from "../types/Adapation";
+import { BatterySituation, NetworkSituation } from "../types/Adapation";
 
 const initState = {
-  energy: { situation: BatterySituation.CHARGING},
-  readyToSync: true,
-  isAdaptationOn: false,
-  isOffline: false }
+  energy: { status: BatterySituation.CHARGING },
+  offline: {
+      network: NetworkSituation.OFFLINE,
+      server: NetworkSituation.SERVER_UNAVALIABLE
+  }
+}
 
 const adaptationReducer = (state = initState, action: any) => {
   switch (action.type) {
 
     case adaptationConstants.BATTERY_STATUS:
-      return { ...state, energy: { situation: action.situation }}
-
-    case adaptationConstants.SYNC:
-      return { ...state, readyToSync : action.readyToSync, isAdaptationOn: action.isAdaptationOn}
+      return { ...state, energy: action.status}
 
     case adaptationConstants.NETWORK_STATUS:
-      return { ...state, isOffline: action.isOffline }
+      return { ...state, offline: action.offline }
 
     default:
       return state;

@@ -2,6 +2,7 @@ import wordsConstants from "../contants/wordsConstants"
 
 const initState =
 { words: [], isWordsFetching: false, isWordAdding: false, msg: "",  successRate: 0 }
+
 const wordsReducer = (state = initState, action: any) => {
   switch (action.type) {
     case wordsConstants.ADD_WORD_REQUEST:
@@ -33,7 +34,7 @@ const wordsReducer = (state = initState, action: any) => {
 
     case wordsConstants.DELETE_WORD_FAILURE:
       return { ...state, msg: action.err }
-      
+
     default:
       return state;
   }

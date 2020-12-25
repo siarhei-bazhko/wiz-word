@@ -7,11 +7,19 @@ enum BatterySituation {
 
 enum NetworkSituation {
   ONLINE = 0,
-  OFFLINE = 1,
-  SERVER_UNAVALIABLE = 2
+  SERVER_AVALIABLE = 1,
+
+  OFFLINE = 2,
+  SERVER_UNAVALIABLE = 3
+}
+
+enum UserNotification {
+  INTERNET_UNREACHABLE = 0,
+  LIMITED_FUNCTIONALITY = 1,
 }
 
 export {
   BatterySituation,
-  NetworkSituation
+  NetworkSituation,
+  UserNotification
 }

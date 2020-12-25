@@ -3,20 +3,19 @@ import * as Network from 'expo-network';
 
 import { store } from "../helpers/reduxStore";
 import { setBatterySituation, setNetworkSituation } from "../actions/adaptationAction";
-import { BatterySituation } from '../types/Adapation';
+import { BatterySituation, NetworkSituation, UserNotification } from '../types/Adapation';
 import { copyLocalState,
   syncOfflineStateWithServerRequest,
   syncOfflineStateWithServerSuccess,
   syncOfflineStateWithServerFailure,
-  resetList,
   resetLists,
   getWordsRequest,
-  getWordsSuccess
+  getWordsSuccess,
+  getWordsFailure
 } from '../actions/wordsAction';
-import { storage } from 'firebase';
 import { Word } from '../types/Word';
 import api from '../api/firebase';
-import { getFlashcards } from './offline';
+import { getFlashcards } from '../adaptations/offline';
 
 const CHECK_FREQUENCY = 100;
 
@@ -27,34 +26,6 @@ function init() {
 function situationChecker() {
   // checkBatterySituation();
   checkNetworkSituation();
-  // switch (true) {
-  //   /** Energy checks */
-  //   case await isBatteryInRange(0, 15):
-  //     console.log("Battery is 0 - 15 %");
-  //   case isBatteryInRange(15, 30):
-  //     console.log("Battery is 15 - 30 %");
-  //     default:
-  //     console.log("Battery is > 30%");
-  // }
-
-  // switch(true) {
-  //   /** Offline checks */
-  //   case isNetworkAvaliable():
-  //     console.log("Firebase is Avaliable SUPER!!!");
-  //     break;
-  //   case isDeviceOffline():
-  //     console.log("Device is offline");
-  //     isAirPlaneOn();
-  //     console.log("Please turn off AirPlaneMode");
-  //     isWifiOff();
-  //     console.log("Please turn on Wifi");
-  //     isMobileOff();
-  //     console.log("Please turn on (Mobile) Internet");
-  //     break;
-  //   default:
-  //     console.log("Seems like this is unreachable statement");
-  //     break;
-  // }
 }
 
 
@@ -83,63 +54,67 @@ async function checkBatterySituation() {
 }
 
 async function checkNetworkSituation() {
+
+
   try {
-    const isOffline = await Network.isAirplaneModeEnabledAsync()
-    // console.log("==========================");
-    // console.log("new: "+isOffline);
-    // console.log("old:"+ store.getState().situations.isOffline);
-    // console.log("==========================");
-
-    const prevIsOffline= store.getState().situations.isOffline;
-    const canCopyLocalState = isOffline && (isOffline !== prevIsOffline);
-    const canSyncDB = !isOffline && (isOffline !== prevIsOffline);
-
+    // const isOffline = await Network.isAirplaneModeEnabledAsync();
+    const { isInternetReachable: isOnline } = await Network.getNetworkStateAsync();
+    const isOffline = !isOnline;
+    const prevNetworkState = store.getState().situations.offline.network;
+    const prevIsOffline = prevNetworkState === NetworkSituation.OFFLINE ? true : false;
+    // always change situation on change
     if(isOffline !== prevIsOffline) {
-      store.dispatch(setNetworkSituation(isOffline));
+      console.log("++++++++++++++++++++++");
+
+      console.log(prevIsOffline, isOffline);
+
+      console.log("++++++++++++++++++++++");
+      const network = isOffline ? NetworkSituation.OFFLINE : NetworkSituation.ONLINE
+      // TODO: add server check for avalaibility
+      const server = isOffline ? NetworkSituation.SERVER_UNAVALIABLE : NetworkSituation.SERVER_AVALIABLE;
+      store.dispatch(setNetworkSituation({ network, server }))
     }
 
-    if(canCopyLocalState) {
-      store.dispatch(copyLocalState(store.getState().words.words));
-    }
+    if(isOffline) {
+      notifyUser(UserNotification.INTERNET_UNREACHABLE)
+      notifyUser(UserNotification.LIMITED_FUNCTIONALITY)
 
-    if(canSyncDB) {
-      const dbState = store.getState().words.words;
-      const offlineState = store.getState().offline.words;
-      // const mergedState = mergeStates(dbState, offlineState);
-      // console.log(`TRY TO SYNC ${mergedState.length}` + JSON.stringify(mergedState));
-      // push all offline state to db
-      // store.dispatch(syncOfflineStateWithServerRequest())
-      const token = store.getState().auth.user.userToken;
-      const delBuffer = store.getState().offline.deletedList;
-      const addBuffer = store.getState().offline.addedList;
-      try {
-        await api(token).syncOfflineWithServer(addBuffer, delBuffer);
-        store.dispatch(resetLists())
-        store.dispatch(getWordsRequest())
-        const words = await getFlashcards(store.dispatch, token)
-        store.dispatch(getWordsSuccess(words));
-      } catch(err) {
-        console.log("CANT SYNC");
+      const canCopyLocalState = isOffline !== prevIsOffline;
+
+      if(canCopyLocalState) {
+        store.dispatch(copyLocalState(store.getState().words.words));
       }
-      // store.dispatch(syncState(mergedState))
     }
 
+    if(isOnline) {
+      const canSyncDB = isOffline !== prevIsOffline;
+      if(canSyncDB) {
+        syncDB()
+      }
+    }
   } catch (err) {
     console.log(err);
   }
 }
 
-function mergeStates(dbState: Word[], offlineState: Word[]) {
-  const mergedState: Word[] = JSON.parse(JSON.stringify(offlineState));
-  // TODO: redo merge (maybe)
-  // dbState.forEach((dbWord: Word) => {
-  //   offlineState.forEach((offlineWord: Word) => {
-  //     // if there are any words in dbState that are not in offlineState
-  //     // we consider them as deleted
-  //     // vise versa: all new words in offline state are added to dbState
+async function syncDB() {
+  const token = store.getState().auth.user.userToken;
+  const delBuffer = store.getState().offline.deletedList;
+  const addBuffer = store.getState().offline.addedList;
+  try {
+    await api(token).syncOfflineWithServer(addBuffer, delBuffer);
+    store.dispatch(resetLists())
+    store.dispatch(getWordsRequest())
+    const words: Word[] = await getFlashcards(store.dispatch, token)
+    store.dispatch(getWordsSuccess(words));
+  } catch(err) {
+    console.log("CANT SYNC");
+    store.dispatch(getWordsFailure(`adaptation: can't fetch words ${err}`))
+  }
+}
 
-  //   })})
-    return mergedState;
+function notifyUser(notificationType: UserNotification) {
+
 }
 
 export default init;

@@ -1,23 +1,17 @@
 import adaptationConstants from "../contants/adaptationConstants"
-import { BatterySituation } from "../types/Adapation"
+import { BatterySituation, NetworkSituation } from "../types/Adapation"
 
-const setBatterySituation = (situation: BatterySituation) => ({
+const setBatterySituation = (status: BatterySituation) => ({
   type: adaptationConstants.BATTERY_STATUS,
-  situation })
-
-const setSyncReady = (readyToSync: boolean, isAdaptationOn: boolean) => ({
-  type: adaptationConstants.SYNC,
-  readyToSync,
-  isAdaptationOn
+  status
 })
 
-const setNetworkSituation = (isOffline: boolean) => ({
+const setNetworkSituation = (offline: { network: NetworkSituation, server: NetworkSituation}) => ({
   type: adaptationConstants.NETWORK_STATUS,
-  isOffline
+  offline
 })
 
 export {
   setBatterySituation,
-  setSyncReady,
   setNetworkSituation
 }
