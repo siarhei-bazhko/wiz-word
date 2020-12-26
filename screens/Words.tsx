@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux"
-import { List } from 'react-native-paper';
+import { ActivityIndicator, Colors, List } from 'react-native-paper';
 import type { Word } from "../types/Word";
 import { ScrollView } from "react-native";
 import InputsWrapper from "../components/Words/InputsWrapper";
@@ -29,10 +29,13 @@ class Words extends React.Component<WordsProps, Word[]> {
         <ScrollView>
           <InputsWrapper />
           <List.Section>
-            <List.Accordion
+              <List.Accordion
               title="School/University section"
+              expanded={true}
               left={props => <List.Icon {...props} icon="folder" />}>
-              {
+              { this.props.syncPending ?
+                (<ActivityIndicator animating={true} color={Colors.green800} />
+                ) : (
                 this.props.words instanceof Array ?
                 this.props.words.map((word, index) => (
                   <ListItem
@@ -42,8 +45,9 @@ class Words extends React.Component<WordsProps, Word[]> {
                     userToken={this.props.userToken}
                   />))
                   : null
+                )
               }
-            </List.Accordion>
+              </List.Accordion>
           </List.Section>
         </ScrollView>
       );
@@ -58,6 +62,7 @@ const mapStateToProps = (state: any) => {
                        || state.situations.energy.status === BatterySituation.LOW_BATTERY
   const words = isOffline ? offlineWords : localWords;
   return {
+    syncPending: state?.offline?.syncOfflineState,
     userToken: state?.auth?.user?.userToken ? state.auth.user.userToken : null,
     isWordAdding: state?.words?.isWordAdding ? state.words.isWordAdding : false,
     words,

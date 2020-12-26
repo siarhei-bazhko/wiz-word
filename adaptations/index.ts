@@ -4,7 +4,8 @@ import * as Network from 'expo-network';
 import { store } from "../helpers/reduxStore";
 import { setBatterySituation, setForcedOffline, setNetworkSituation, syncFailed } from "../actions/adaptationAction";
 import { BatterySituation, NetworkSituation, UserNotification } from '../types/Adapation';
-import { copyLocalState,
+import {
+  copyLocalState,
   syncOfflineStateWithServerRequest,
   syncOfflineStateWithServerSuccess,
   syncOfflineStateWithServerFailure,
@@ -38,10 +39,10 @@ async function checkBatterySituation() {
       case batteryState === Battery.BatteryState.CHARGING:
         situation = BatterySituation.CHARGING
         break;
-      case batteryLevel > 0.15 && batteryLevel <= 0.3:
-        situation = BatterySituation.MEDIUM_BATTERY
-        break;
-      case batteryLevel <= 0.15:
+      // case batteryLevel > 0.15 && batteryLevel <= 0.3:
+      //   situation = BatterySituation.MEDIUM_BATTERY
+      //   break;
+      case batteryLevel <= 0.50:
         situation = BatterySituation.LOW_BATTERY
         break;
       default:
@@ -70,12 +71,12 @@ async function checkBatterySituation() {
         store.dispatch(setForcedOffline(false))
       }
 
-      if(situation === BatterySituation.MEDIUM_BATTERY) {
-        console.log(" 15 -- 30  situation");
+      // if(situation === BatterySituation.MEDIUM_BATTERY) {
+      //   console.log(" 15 -- 30  situation");
 
-        // TODO: disable dictionary API
-        // TODO: decrease sync frequency
-      }
+      //   // TODO: disable dictionary API
+      //   // TODO: decrease sync frequency
+      // }
       //change situation (last action)
       store.dispatch(setBatterySituation(situation))
     }
@@ -134,14 +135,17 @@ async function syncDB() {
   const delBuffer = store.getState().offline.deletedList;
   const addBuffer = store.getState().offline.addedList;
   try {
+    store.dispatch(syncOfflineStateWithServerRequest())
     await api(token).syncOfflineWithServer(addBuffer, delBuffer);
     store.dispatch(resetLists())
     store.dispatch(getWordsRequest())
     const words: Word[] = await getFlashcards(store.dispatch, token)
     store.dispatch(getWordsSuccess(words));
+    store.dispatch(syncOfflineStateWithServerSuccess())
     return
   } catch(err) {
     console.log("CANT SYNC");
+    store.dispatch(syncOfflineStateWithServerFailure())
     store.dispatch(getWordsFailure(`adaptation: can't fetch words ${err}`))
     return
   }

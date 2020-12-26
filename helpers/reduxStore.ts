@@ -41,7 +41,7 @@ const INIT_STATE = {
 const persistConfig = {
     key: "root",
     storage: AsyncStorage,
-    whitelist: ['auth', 'offline']
+    whitelist: ['auth', 'offline', 'situations']
 };
 
 const rootReducer = combineReducers({

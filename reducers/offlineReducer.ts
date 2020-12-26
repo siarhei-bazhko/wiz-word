@@ -29,6 +29,17 @@ const offlineWordsReducer = (state = initOfflineState, action: any) => {
 
     case wordsConstants.RESET_LISTS:
       return { ...state, deletedList: [], addedList: []}
+
+    /** sync state on online */
+    case wordsConstants.SYNC_OFFLINE_STATE_REQUEST:
+      return { ...state, syncOfflineState: action.syncOfflineState }
+
+    case wordsConstants.SYNC_OFFLINE_STATE_SUCCESS:
+      return { ...state, syncOfflineState: action.syncOfflineState }
+
+    case wordsConstants.SYNC_OFFLINE_STATE_FAILURE:
+      return { ...state, syncOfflineState: action.syncOfflineState }
+
     default:
       return state;
   }
