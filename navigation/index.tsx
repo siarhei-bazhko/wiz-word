@@ -6,14 +6,20 @@ import { NavigationContainer } from "@react-navigation/native";
 import { Home, Words, Quiz, SignIn, SignUp, Settings } from "../screens";
 import Titles from "../contants/headers";
 import { connect } from "react-redux";
+import { BatterySituation, NetworkSituation } from "../types/Adapation";
 
 const Stack = createStackNavigator();
 
-function RootNavigator({ userToken }) {
+function RootNavigator({ userToken, energy, network }) {
+   const isOffline = network === NetworkSituation.OFFLINE || energy === BatterySituation.LOW_BATTERY
+   const displayLogin = isOffline ? false : (userToken === null ? true : false)
+   console.log(`Can display log in ? ${displayLogin}`);
+   console.log(`is Offline ? ${isOffline}`);
+
   return (
     <NavigationContainer>
       <Stack.Navigator>
-      { userToken === null ? (
+      { displayLogin ? (
         <>
           <Stack.Screen
             name="SignIn"
@@ -61,8 +67,10 @@ function RootNavigator({ userToken }) {
   );
 }
 
-const mapStateToProps = ({auth}: any) => ({
-    userToken: auth?.user?.userToken
+const mapStateToProps = (state: any) => ({
+    network: state.situations.offline.network,
+    energy: state.situations.energy.status,
+    userToken: state.auth?.user?.userToken
 })
 
 export default connect(mapStateToProps, null)(RootNavigator)

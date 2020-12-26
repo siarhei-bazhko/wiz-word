@@ -11,7 +11,19 @@ const setNetworkSituation = (offline: { network: NetworkSituation, server: Netwo
   offline
 })
 
+const setForcedOffline = (forcedOffline : boolean) => ({
+  type: adaptationConstants.FORCED_OFFLINE,
+  forcedOffline
+})
+
+const syncFailed = (syncFailed: boolean) => ({
+  type: adaptationConstants.SYNC_FAILED,
+  syncFailed
+})
+
 export {
   setBatterySituation,
-  setNetworkSituation
+  setNetworkSituation,
+  setForcedOffline,
+  syncFailed
 }

@@ -45,7 +45,7 @@ const updateStatsRequest = (successRate : number) => (
 
 const offlineAddWord = (word: Word) => ({
   type: wordsConstants.OFFLINE_ADD_WORD,
-  word : { ...word, sync: false},
+  word,
 })
 
 const offlineGetWords = () => ({

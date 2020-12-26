@@ -6,7 +6,7 @@ import { ScrollView } from "react-native";
 import InputsWrapper from "../components/Words/InputsWrapper";
 import ListItem from "../components/Words/ListItem";
 import { deleteFlashcard, getFlashcards } from "../adaptations/offline";
-import { NetworkSituation } from "../types/Adapation";
+import { BatterySituation, NetworkSituation } from "../types/Adapation";
 
 type WordsProps = {
   userToken: string,
@@ -51,9 +51,12 @@ class Words extends React.Component<WordsProps, Word[]> {
 }
 
 const mapStateToProps = (state: any) => {
+  // TODO: refactor (ifce)
   const localWords = state?.words?.words ? state.words.words : [];
   const offlineWords = state.offline.words
-  const words = state.situations.offline.network === NetworkSituation.OFFLINE ? offlineWords : localWords;
+  const isOffline = state.situations.offline.network === NetworkSituation.OFFLINE
+                       || state.situations.energy.status === BatterySituation.LOW_BATTERY
+  const words = isOffline ? offlineWords : localWords;
   return {
     userToken: state?.auth?.user?.userToken ? state.auth.user.userToken : null,
     isWordAdding: state?.words?.isWordAdding ? state.words.isWordAdding : false,

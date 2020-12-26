@@ -2,7 +2,7 @@ import { Word } from "../types/Word";
 import { store } from "../helpers/reduxStore";
 import api, {fs} from "../api/firebase"
 import { addToDeletedList, addWordFailure, addWordRequest, addWordSuccess, copyLocalState, deleteWordFailure, deleteWordRequest, deleteWordSuccess, getWordsFailure, getWordsRequest, getWordsSuccess, offlineAddWord, offlineDeleteWord, offlineGetWords } from "../actions/wordsAction";
-import { NetworkSituation } from "../types/Adapation";
+import { BatterySituation, NetworkSituation } from "../types/Adapation";
 
 // interface ProxyAPI {
   // authentication
@@ -17,15 +17,16 @@ import { NetworkSituation } from "../types/Adapation";
 // }
 
 function addFlashcard(dispatch: Function, userToken: string, newWordPair: Word) {
-  const situation = store.getState().situations.offline.network;
+  const network = store.getState().situations.offline.network;
+  const energy = store.getState().situations.energy.status;
 
-  if(situation === NetworkSituation.OFFLINE){
+  if(network === NetworkSituation.OFFLINE || energy === BatterySituation.LOW_BATTERY){
     console.log("ADD: You are offline! So Nothing IS stored YET");
     dispatch(offlineAddWord(newWordPair))
     return
   }
 
-  if (situation === NetworkSituation.ONLINE) {
+  if (network === NetworkSituation.ONLINE) {
     const call = api(userToken);
     addWordRequest();
     call.addFlashcard(newWordPair)
@@ -45,18 +46,14 @@ function addFlashcard(dispatch: Function, userToken: string, newWordPair: Word) 
     .catch(err => {
       dispatch(getWordsFailure(err.msg));
     });
-    return
   }
-
-  console.log("should be unreachable!!!!!!!!!!!!!!!!!!!!!!!!!");
-
-
 }
 
 async function deleteFlashcard(dispatch: Function, userToken: string, id: string | number) {
-  const situation = store.getState().situations.offline.network;
+  const network = store.getState().situations.offline.network;
+  const energy = store.getState().situations.energy.status;
 
-  if(situation === NetworkSituation.OFFLINE){
+  if(network === NetworkSituation.OFFLINE || energy === BatterySituation.LOW_BATTERY){
     console.log("DELETE: You are offline! So Nothing IS stored YET");
     console.log(id);
     dispatch(offlineDeleteWord(id))
@@ -65,7 +62,7 @@ async function deleteFlashcard(dispatch: Function, userToken: string, id: string
     return
   }
 
-  if (situation === NetworkSituation.ONLINE) {
+  if (network === NetworkSituation.ONLINE) {
   const call = api(userToken);
     dispatch(deleteWordRequest());
     try {
@@ -86,15 +83,16 @@ async function deleteFlashcard(dispatch: Function, userToken: string, id: string
 }
 
 function getFlashcards(dispatch: Function, userToken : string) {
-  const situation = store.getState().situations.offline.network;
+  const network = store.getState().situations.offline.network;
+  const energy = store.getState().situations.energy.status;
 
-  if(situation === NetworkSituation.OFFLINE){
+  if(network === NetworkSituation.OFFLINE || energy === BatterySituation.LOW_BATTERY){
     console.log("GET:// You are offline! So Nothing IS stored YET");
     dispatch(offlineGetWords());
     return
   }
 
-  if (situation === NetworkSituation.ONLINE) {
+  if (network === NetworkSituation.ONLINE) {
     const call = api(userToken);
     dispatch(getWordsRequest());
     call.getFlashcards()

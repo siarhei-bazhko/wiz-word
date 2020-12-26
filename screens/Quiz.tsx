@@ -3,6 +3,7 @@ import { View, StyleSheet } from "react-native";
 import { Button, Card, DataTable, Paragraph, TextInput, Title } from "react-native-paper";
 import { connect } from "react-redux";
 import { updateStatsRequest } from "../actions/wordsAction";
+import { BatterySituation, NetworkSituation } from "../types/Adapation";
 
  class Quiz extends React.Component {
 
@@ -144,9 +145,17 @@ const styles = StyleSheet.create({
   }
 });
 
-const mapStateToProps = ({words}: any) => ({
-    words: words.words
-})
+const mapStateToProps = (state: any) => {
+  // TODO: refactor (ifce)
+  const localWords = state?.words?.words ? state.words.words : [];
+  const offlineWords = state.offline.words
+  const isOffline = state.situations.offline.network === NetworkSituation.OFFLINE
+                       || state.situations.energy.status === BatterySituation.LOW_BATTERY
+  const words = isOffline ? offlineWords : localWords;
+  return {
+    words
+  }
+}
 
 const mapDispatchToProps = (dispatch: Function) => ({
   updateStats: (successRate: number) => {
