@@ -10,11 +10,9 @@ import { BatterySituation, NetworkSituation } from "../types/Adapation";
 
 const Stack = createStackNavigator();
 
-function RootNavigator({ userToken, energy, network }) {
-   const isOffline = network === NetworkSituation.OFFLINE || energy === BatterySituation.LOW_BATTERY
-   const displayLogin = isOffline ? false : (userToken === null ? true : false)
-   console.log(`Can display log in ? ${displayLogin}`);
-   console.log(`is Offline ? ${isOffline}`);
+function RootNavigator({ userToken, network, forcedOffline }) {
+  const isOffline = network === NetworkSituation.OFFLINE  || forcedOffline === true
+  const displayLogin = isOffline ? false : (userToken === null ? true : false)
 
   return (
     <NavigationContainer>
@@ -69,7 +67,7 @@ function RootNavigator({ userToken, energy, network }) {
 
 const mapStateToProps = (state: any) => ({
     network: state.situations.offline.network,
-    energy: state.situations.energy.status,
+    forcedOffline: state.situations.energy.forcedOffline,
     userToken: state.auth?.user?.userToken
 })
 

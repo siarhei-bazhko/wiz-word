@@ -14,6 +14,9 @@ const wordsReducer = (state = initState, action: any) => {
     case wordsConstants.ADD_WORD_FAILURE:
       return { ...state, isWordAdding: action.isWordAdding, message: action.err };
 
+    case wordsConstants.UPDATE_STATS_REQUEST:
+      return { ...state, successRate: action.successRate }
+
     case wordsConstants.GET_WORDS_REQUEST:
       // TODO: add to action
       return { ...state, isWordsFetching: true };

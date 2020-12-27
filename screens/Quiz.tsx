@@ -2,7 +2,7 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import { Button, Card, DataTable, Paragraph, TextInput, Title } from "react-native-paper";
 import { connect } from "react-redux";
-import { updateStatsRequest } from "../actions/wordsAction";
+import { offlineUpdateStatsRequest, updateStatsRequest } from "../actions/wordsAction";
 import { BatterySituation, NetworkSituation } from "../types/Adapation";
 
  class Quiz extends React.Component {
@@ -61,8 +61,12 @@ import { BatterySituation, NetworkSituation } from "../types/Adapation";
         return word.isCorrect ? acc + 1 : acc
       }
       ), 0);
-      const successRate = correctWords / this.state.totalWordsCount * 100;
-      this.props.updateStats(successRate);
+      const successRate = Math.round(correctWords / this.state.totalWordsCount * 100 *  10) / 10;
+
+      const isOffline = this.props.network === NetworkSituation.OFFLINE
+                     || this.props.forcedOffline
+      const fn = isOffline ? offlineUpdateStatsRequest : updateStatsRequest
+      this.props.updateStats(fn, successRate);
     }
   }
 
@@ -150,17 +154,21 @@ const mapStateToProps = (state: any) => {
   const localWords = state?.words?.words ? state.words.words : [];
   const offlineWords = state.offline.words
   const isOffline = state.situations.offline.network === NetworkSituation.OFFLINE
-                       || state.situations.energy.status === BatterySituation.LOW_BATTERY
+                 || state.situations.energy.forcedOffline
   const words = isOffline ? offlineWords : localWords;
   return {
-    words
+    words,
+    network: state.situations.offline.network,
+    forcedOffline: state.situations.energy.forcedOffline,
   }
 }
 
-const mapDispatchToProps = (dispatch: Function) => ({
-  updateStats: (successRate: number) => {
-    dispatch(updateStatsRequest(successRate));
+const mapDispatchToProps = (dispatch: Function) => {
+  return {
+    updateStats: (actionFunction: Function, successRate: number) => {
+      dispatch(actionFunction(successRate));
+    }
   }
-})
+}
 
 export default connect(mapStateToProps, mapDispatchToProps)(Quiz);

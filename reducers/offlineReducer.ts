@@ -21,6 +21,10 @@ const offlineWordsReducer = (state = initOfflineState, action: any) => {
     case wordsConstants.OFFLINE_DELETE_WORD:
       return { ...state, words: deleteWord(action.id, state) }
 
+    case wordsConstants.OFFLINE_UPDATE_STATS_REQUEST:
+      return { ...state, successRate: action.successRate }
+
+
     case wordsConstants.COPY_LOCAL_STATE:
       return { ...state, words: copyWords(action.localWords) }
 
@@ -30,6 +34,7 @@ const offlineWordsReducer = (state = initOfflineState, action: any) => {
     case wordsConstants.RESET_LISTS:
       return { ...state, deletedList: [], addedList: []}
 
+      
     /** sync state on online */
     case wordsConstants.SYNC_OFFLINE_STATE_REQUEST:
       return { ...state, syncOfflineState: action.syncOfflineState }

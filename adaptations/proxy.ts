@@ -18,9 +18,9 @@ import { BatterySituation, NetworkSituation } from "../types/Adapation";
 
 function addFlashcard(dispatch: Function, userToken: string, newWordPair: Word) {
   const network = store.getState().situations.offline.network;
-  const energy = store.getState().situations.energy.status;
+  const forcedOffline = store.getState().situations.energy.forcedOffline;
 
-  if(network === NetworkSituation.OFFLINE || energy === BatterySituation.LOW_BATTERY){
+  if(network === NetworkSituation.OFFLINE || forcedOffline){
     console.log("ADD: You are offline! So Nothing IS stored YET");
     dispatch(offlineAddWord(newWordPair))
     return
@@ -51,11 +51,10 @@ function addFlashcard(dispatch: Function, userToken: string, newWordPair: Word) 
 
 async function deleteFlashcard(dispatch: Function, userToken: string, id: string | number) {
   const network = store.getState().situations.offline.network;
-  const energy = store.getState().situations.energy.status;
+  const forcedOffline = store.getState().situations.energy.forcedOffline;
 
-  if(network === NetworkSituation.OFFLINE || energy === BatterySituation.LOW_BATTERY){
+  if(network === NetworkSituation.OFFLINE || forcedOffline){
     console.log("DELETE: You are offline! So Nothing IS stored YET");
-    console.log(id);
     dispatch(offlineDeleteWord(id))
     dispatch(addToDeletedList(id));
 
@@ -84,9 +83,9 @@ async function deleteFlashcard(dispatch: Function, userToken: string, id: string
 
 function getFlashcards(dispatch: Function, userToken : string) {
   const network = store.getState().situations.offline.network;
-  const energy = store.getState().situations.energy.status;
+  const forcedOffline = store.getState().situations.energy.forcedOffline;
 
-  if(network === NetworkSituation.OFFLINE || energy === BatterySituation.LOW_BATTERY){
+  if(network === NetworkSituation.OFFLINE || forcedOffline){
     console.log("GET:// You are offline! So Nothing IS stored YET");
     dispatch(offlineGetWords());
     return

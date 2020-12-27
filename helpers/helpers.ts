@@ -1,7 +1,7 @@
 const NUMBER = 1000000;
 
-const generateWordId : () => number =
-  () => (Math.floor(Math.random() * NUMBER));
+const generateWordId : () => string =
+  () => (new Date().getTime().toString());
 
 
 const randomWord : (listSize: number) => number =

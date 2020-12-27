@@ -1,6 +1,6 @@
 type Word = {
-  refId?:number,
-  id: number,
+  refId?: string,
+  id: string,
   origin: string,
   translation: string,
   timestamp: number

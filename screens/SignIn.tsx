@@ -5,6 +5,7 @@ import { connect } from "react-redux";
 import { signInFailure, signInRequest, signInSuccess } from "../actions/authenticationActions";
 import { TextInput } from "react-native-paper";
 import { Button } from "../components";
+import { setForcedOffline } from "../actions/adaptationAction";
 
 class SignIn extends React.Component {
   constructor(props: any) {
@@ -52,6 +53,8 @@ class SignIn extends React.Component {
         <Button alignmentStyle={styles.buttonAlignment} buttonTitle="SIGN IN" iconType="sign-direction" fn={this.props.handleSignIn} args={this.state}/>
 
         <Button alignmentStyle={styles.buttonAlignment} buttonTitle="SIGN UP" iconType="exit-run" fn={ () => this.props.navigation.navigate("SignUp")} args={this.state}/>
+
+        <Button alignmentStyle={styles.buttonAlignment} buttonTitle="I want use app offline" iconType="alien" fn={this.props.enableOfflineMode} args={this.state}></Button>
       </View>
     );
   }
@@ -89,6 +92,10 @@ const mapDispatchToProps = (dispatch: Function) => ({
       .catch((err)=> {
         dispatch(signInFailure(err))
       });
+  },
+
+  enableOfflineMode: () => {
+    dispatch(setForcedOffline(true))
   }
 
 })

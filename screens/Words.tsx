@@ -5,7 +5,7 @@ import type { Word } from "../types/Word";
 import { ScrollView } from "react-native";
 import InputsWrapper from "../components/Words/InputsWrapper";
 import ListItem from "../components/Words/ListItem";
-import { deleteFlashcard, getFlashcards } from "../adaptations/offline";
+import { deleteFlashcard, getFlashcards } from "../adaptations/proxy";
 import { BatterySituation, NetworkSituation } from "../types/Adapation";
 
 type WordsProps = {
@@ -59,7 +59,7 @@ const mapStateToProps = (state: any) => {
   const localWords = state?.words?.words ? state.words.words : [];
   const offlineWords = state.offline.words
   const isOffline = state.situations.offline.network === NetworkSituation.OFFLINE
-                       || state.situations.energy.status === BatterySituation.LOW_BATTERY
+                       || state.situations.energy.forcedOffline
   const words = isOffline ? offlineWords : localWords;
   return {
     syncPending: state?.offline?.syncOfflineState,

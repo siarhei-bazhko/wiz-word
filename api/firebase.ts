@@ -51,25 +51,17 @@ function api(userId: string) {
   async function syncOfflineWithServer(addedArray:Word[], deletedArray) {
     try {
       const batch = fs.batch();
-      console.log(JSON.stringify(deletedArray));
-      console.log(JSON.stringify(addedArray));
-
       deletedArray.forEach(id => {
         const ref = fs.collection("users").doc(userId).collection("flashcards").doc(id)
         batch.delete(ref);
       });
 
-      console.log("longgg");
-
       addedArray.forEach(doc => {
-      console.log("doc2");
 
       const ref = fs.collection("users").doc(userId).collection("flashcards").doc();
       batch.set(ref, doc)
       })
       const res = await batch.commit();
-      console.log("OK:" + res);
-
     } catch (err) {
       console.log(err);
     }

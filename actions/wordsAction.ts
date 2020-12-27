@@ -38,9 +38,7 @@ const getWordsSuccess = (words: Word[]) => ({ type: wordsConstants.GET_WORDS_SUC
 
 const getWordsFailure = (err: string) => ({ type: wordsConstants.GET_WORDS_FAILURE, err })
 
-const updateStatsRequest = (successRate : number) => (
-  { type: wordsConstants.UPDATE_STATS_REQUEST, successRate })
-
+const updateStatsRequest = (successRate : number) => ({ type: wordsConstants.UPDATE_STATS_REQUEST, successRate })
 
 
 const offlineAddWord = (word: Word) => ({
@@ -55,6 +53,11 @@ const offlineGetWords = () => ({
 const offlineDeleteWord = (id: string) => ({
   type: wordsConstants.OFFLINE_DELETE_WORD,
   id
+})
+
+const offlineUpdateStatsRequest = (successRate : number) => ({
+  type: wordsConstants.OFFLINE_UPDATE_STATS_REQUEST,
+  successRate
 })
 
 const copyLocalState = (localWords: Word[]) => ({
@@ -101,6 +104,9 @@ export {
   offlineAddWord,
   offlineGetWords,
   offlineDeleteWord,
+  offlineUpdateStatsRequest,
+
+  
   copyLocalState,
   syncOfflineStateWithServerRequest,
   syncOfflineStateWithServerSuccess,

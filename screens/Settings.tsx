@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import { signOutFailure, signOutRequest, signOutSuccess } from "../actions/authenticationActions";
 import { Button } from 'react-native-paper';
 import firebase from "../config/firebase";
+import { setForcedOffline } from "../actions/adaptationAction";
 
 class Settings extends React.Component {
   constructor(props: any) {
@@ -45,6 +46,15 @@ class Settings extends React.Component {
           Sign Out
         </Button>
 
+        <Button
+          icon="google-earth"
+          mode="contained"
+          color="green"
+          style={styles.onlineButtonStyle}
+          onPress={() => this.props.disableOfflineMode()}>
+          Go Online
+        </Button>
+
       </View>
     );
   }
@@ -64,6 +74,12 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginHorizontal: 30
   },
+
+  onlineButtonStyle: {
+    marginTop: 50,
+    marginHorizontal: 30
+  },
+
   info: {
     fontSize: 16,
     color: 'red'
@@ -89,6 +105,10 @@ const mapDispatchToProps = (dispatch: Function) => ({
           console.log(err);
           dispatch(signOutFailure(err))
         });
+  },
+
+  disableOfflineMode: () => {
+    dispatch(setForcedOffline(false))
   }
 
 })

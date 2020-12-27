@@ -8,7 +8,7 @@ import Button from "../Home/Button";
 import { generateWordId } from "../../helpers";
 import { addWordFailure, addWordRequest, addWordSuccess, getWordsFailure, getWordsRequest, getWordsSuccess } from '../../actions/wordsAction';
 import type { Word } from "../../types/Word";
-import { addFlashcard, getFlashcards } from '../../adaptations/offline';
+import { addFlashcard, getFlashcards } from '../../adaptations/proxy';
 import api from '../../api/firebase';
 
 

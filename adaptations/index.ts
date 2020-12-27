@@ -16,7 +16,7 @@ import {
 } from '../actions/wordsAction';
 import { Word } from '../types/Word';
 import api from '../api/firebase';
-import { getFlashcards } from '../adaptations/offline';
+import { getFlashcards } from './proxy';
 
 const CHECK_FREQUENCY = 100;
 
@@ -31,6 +31,9 @@ function situationChecker() {
 
 
 async function checkBatterySituation() {
+  if(store.getState().situations.energy.forcedOffline) {
+    return
+  }
   try {
     const { batteryLevel, batteryState } = await Battery.getPowerStateAsync();
     const prevSituation = store.getState().situations.energy.status;
@@ -42,7 +45,7 @@ async function checkBatterySituation() {
       // case batteryLevel > 0.15 && batteryLevel <= 0.3:
       //   situation = BatterySituation.MEDIUM_BATTERY
       //   break;
-      case batteryLevel <= 0.50:
+      case batteryLevel <= 0.30:
         situation = BatterySituation.LOW_BATTERY
         break;
       default:
@@ -55,7 +58,7 @@ async function checkBatterySituation() {
     if(prevSituation !== situation || lastSyncFailed) {
 
       if(situation === BatterySituation.LOW_BATTERY) {
-        console.log("LOW battery :: goto offline + disable dictionary api + notify user");
+        console.log("Low battery :: goto offline + disable dictionary api + notify user");
         // forced offline
         const prevForcedOffline = store.getState().situations.energy.forcedOffline;
         if(!prevForcedOffline) {
@@ -66,7 +69,6 @@ async function checkBatterySituation() {
 
 
       if(prevSituation === BatterySituation.LOW_BATTERY || lastSyncFailed) {
-        console.log("0000000==============000000");
         syncDB()
         store.dispatch(setForcedOffline(false))
       }
@@ -124,7 +126,6 @@ async function checkNetworkSituation() {
 
 async function syncDB() {
   const token = store.getState().auth.user.userToken;
-  console.log("Token:" + token);
   if(token === null || token === undefined) {
     store.dispatch(syncFailed(true));
     return
