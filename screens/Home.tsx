@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Text } from "react-native";
 import { connect } from "react-redux";
 import { WordDaily, Button, Statistics } from "../components";
 import { daysIntoYear } from "../helpers/helpers";
@@ -13,6 +13,7 @@ class Home extends React.Component {
   render () {
   return (
     <View style={styles.outerContainer}>
+      <Text style={ this.props.isOffline? styles.infoBarOffline : styles.infoBarOnline }> {this.props.isOffline ? "Offline" : "Online" }</Text>
       <WordDaily dailyWord={this.props.dailyWord}/>
       <View style={styles.buttonContainer}>
         <Button buttonTitle="Words" iconType="playlist-edit" fn={(arg:any)=>this.props.navigation.navigate(arg)} args="Words" />
@@ -42,6 +43,20 @@ const styles = StyleSheet.create(
       paddingBottom: 5
     },
 
+    infoBarOffline: {
+      backgroundColor: 'lightgray',
+      color: 'darkred',
+      textAlign: 'center',
+      fontWeight: "bold",
+    },
+
+    infoBarOnline: {
+      backgroundColor: 'lightgray',
+      color: 'darkgreen',
+      textAlign: 'center',
+      fontWeight: "bold",
+    }
+
   }
 );
 
@@ -56,6 +71,7 @@ const mapStateToProps = (state: any) => {
                       : state.words.successRate;
 
   return {
+    isOffline,
     successRate,
     wordCount: words?.length,
     dailyWord: words?.length

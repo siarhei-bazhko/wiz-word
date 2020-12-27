@@ -64,7 +64,7 @@ async function checkBatterySituation() {
       // case batteryLevel > 0.15 && batteryLevel <= 0.3:
       //   situation = BatterySituation.MEDIUM_BATTERY
       //   break;
-      case batteryLevel <= 0.95:
+      case batteryLevel <= 0.70:
         situation = BatterySituation.LOW_BATTERY
         break;
       default:
