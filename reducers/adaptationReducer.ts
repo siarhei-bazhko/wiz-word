@@ -1,4 +1,3 @@
-import { syncFailed } from "../actions/adaptationAction";
 import adaptationConstants from "../contants/adaptationConstants"
 import { BatterySituation, NetworkSituation } from "../types/Adapation";
 
@@ -11,7 +10,7 @@ const initState = {
       network: NetworkSituation.OFFLINE,
       server: NetworkSituation.SERVER_UNAVALIABLE
   },
-  syncFailed: false,
+  isSynchronized: false,
 }
 
 const adaptationReducer = (state = initState, action: any) => {
@@ -23,10 +22,11 @@ const adaptationReducer = (state = initState, action: any) => {
       return { ...state, offline: action.offline }
 
     case adaptationConstants.FORCED_OFFLINE:
+      // TODO: copy local state in case "true"
       return { ...state, energy: { ...state.energy, forcedOffline: action.forcedOffline } }
 
-    case adaptationConstants.SYNC_FAILED:
-      return { ...state, syncFailed: action.syncFailed}
+    case adaptationConstants.IS_SYNCHRONIZED:
+      return { ...state, isSynchronized: action.isSynchronized}
     default:
       return state;
   }

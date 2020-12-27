@@ -2,7 +2,7 @@ import * as Battery from 'expo-battery';
 import * as Network from 'expo-network';
 
 import { store } from "../helpers/reduxStore";
-import { setBatterySituation, setForcedOffline, setNetworkSituation, syncFailed } from "../actions/adaptationAction";
+import { isSynchronized, setBatterySituation, setForcedOffline, setNetworkSituation } from "../actions/adaptationAction";
 import { BatterySituation, NetworkSituation, UserNotification } from '../types/Adapation';
 import {
   copyLocalState,
@@ -27,13 +27,32 @@ function init() {
 function situationChecker() {
   checkBatterySituation();
   checkNetworkSituation();
+  checkForcedOffline();
 }
 
+function checkForcedOffline() {
+  const forcedOffline = store.getState().situations.energy.forcedOffline;
+  const isSync = store.getState().situations.isSynchronized;
+  const token = store.getState().auth.user.userToken;
+
+  if(!forcedOffline && !isSync && token !== null && token !== undefined) {
+    //set is_sync:true
+    store.dispatch(isSynchronized(true))
+    syncDB()
+  } else if (forcedOffline) { // we are offline
+    //TODO: reduce calls (add in add/delete func)
+    //set is_sync: false
+    if(isSync === false) {
+      return
+    }
+    store.dispatch(isSynchronized(false))
+  } else {
+    // if we online and in sync do nothing
+  }
+}
 
 async function checkBatterySituation() {
-  if(store.getState().situations.energy.forcedOffline) {
-    return
-  }
+
   try {
     const { batteryLevel, batteryState } = await Battery.getPowerStateAsync();
     const prevSituation = store.getState().situations.energy.status;
@@ -45,7 +64,7 @@ async function checkBatterySituation() {
       // case batteryLevel > 0.15 && batteryLevel <= 0.3:
       //   situation = BatterySituation.MEDIUM_BATTERY
       //   break;
-      case batteryLevel <= 0.30:
+      case batteryLevel <= 0.95:
         situation = BatterySituation.LOW_BATTERY
         break;
       default:
@@ -53,10 +72,11 @@ async function checkBatterySituation() {
         break;
       }
 
-    const lastSyncFailed = store.getState().situations.syncFailed;
-
-    if(prevSituation !== situation || lastSyncFailed) {
-
+    // if(store.getState().situations.energy.forcedOffline) {
+    //   return
+    // }
+    // const lastSyncFailed = store.getState().situations.syncFailed;
+    if(prevSituation !== situation) {
       if(situation === BatterySituation.LOW_BATTERY) {
         console.log("Low battery :: goto offline + disable dictionary api + notify user");
         // forced offline
@@ -68,7 +88,7 @@ async function checkBatterySituation() {
       }
 
 
-      if(prevSituation === BatterySituation.LOW_BATTERY || lastSyncFailed) {
+      if(prevSituation === BatterySituation.LOW_BATTERY) {
         syncDB()
         store.dispatch(setForcedOffline(false))
       }
@@ -88,9 +108,9 @@ async function checkBatterySituation() {
 }
 
 async function checkNetworkSituation() {
-  if(store.getState().situations.energy.forcedOffline) {
-    return
-  }
+  // if(store.getState().situations.energy.forcedOffline) {
+  //   return
+  // }
   try {
     // const isOffline = await Network.isAirplaneModeEnabledAsync();
     const { isInternetReachable: isOnline } = await Network.getNetworkStateAsync();
@@ -98,7 +118,7 @@ async function checkNetworkSituation() {
     const prevNetworkState = store.getState().situations.offline.network;
     const prevIsOffline = prevNetworkState === NetworkSituation.OFFLINE ? true : false;
 
-    const lastSyncFailed = store.getState().situations.syncFailed;
+    // const lastSyncFailed = store.getState().situations.syncFailed;
     // always change situation on change
     const isSituationChanged = isOffline !== prevIsOffline;
     if(isSituationChanged) {
@@ -111,9 +131,10 @@ async function checkNetworkSituation() {
         store.dispatch(copyLocalState(store.getState().words.words));
       }
 
-      if(isOnline || lastSyncFailed) {
+      if(isOnline) {
         // can sync db
         syncDB()
+        // store.dispatch(setForcedOffline(false))
       }
       //change situation
       store.dispatch(setNetworkSituation({ network, server }))
@@ -126,13 +147,11 @@ async function checkNetworkSituation() {
 
 async function syncDB() {
   const token = store.getState().auth.user.userToken;
-  if(token === null || token === undefined) {
-    store.dispatch(syncFailed(true));
+  const forcedOffline = store.getState().situations.energy.forcedOffline;
+  if(forcedOffline || token === undefined || token === null) {
     return
-  } else {
-    // hack todo : maybe redo
-    store.dispatch(syncFailed(false))
   }
+
   const delBuffer = store.getState().offline.deletedList;
   const addBuffer = store.getState().offline.addedList;
   try {

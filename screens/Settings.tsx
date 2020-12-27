@@ -5,19 +5,31 @@ import { signOutFailure, signOutRequest, signOutSuccess } from "../actions/authe
 import { Button } from 'react-native-paper';
 import firebase from "../config/firebase";
 import { setForcedOffline } from "../actions/adaptationAction";
+import { copyLocalState } from "../actions/wordsAction";
+import { NetworkSituation } from "../types/Adapation";
 
 class Settings extends React.Component {
   constructor(props: any) {
     super(props)
+
+    this.enableOfflineMode = this.enableOfflineMode.bind(this)
+  }
+
+  enableOfflineMode() {
+    this.props.enableOfflineMode(this.props.words)
+  }
+
+  handleSignOut() {
+    this.props.handleSignOut(this.props.words)
   }
 
   render() {
     return (
       <View>
         <View style={styles.infoBg}>
-          <Text style={styles.info}>Message: {this.props.message}</Text>
+          <Text style={styles.info}>Message: {this.props.message instanceof String ? this.props.message : '-'}</Text>
           <Text style={styles.info}>Pending Auth: {this.props.pendingAuth.toString()}</Text>
-          <Text style={styles.info}>userToken: {this.props.userToken}</Text>
+          <Text style={styles.info}>userToken: {this.props?.userToken ? this.props.userToken : '-'}</Text>
         </View>
         <Button
           icon="skull-outline"
@@ -42,7 +54,7 @@ class Settings extends React.Component {
           mode="contained"
           color="darkred"
           style={styles.buttonStyle}
-          onPress={() => this.props.handleSignOut()}>
+          onPress={() => this.handleSignOut()}>
           Sign Out
         </Button>
 
@@ -53,6 +65,15 @@ class Settings extends React.Component {
           style={styles.onlineButtonStyle}
           onPress={() => this.props.disableOfflineMode()}>
           Go Online
+        </Button>
+
+        <Button
+          icon="alien"
+          mode="contained"
+          color="red"
+          style={styles.offlineButtonStyle}
+          onPress={() => {this.enableOfflineMode()}}>
+          Go Offline
         </Button>
 
       </View>
@@ -80,20 +101,35 @@ const styles = StyleSheet.create({
     marginHorizontal: 30
   },
 
+  offlineButtonStyle: {
+    marginTop: 10,
+    marginHorizontal: 30
+  },
+
   info: {
     fontSize: 16,
     color: 'red'
   }
 });
 
-const mapStateToProps = ({auth}: any) => ({
-    message: auth?.user?.authMessage,
-    pendingAuth: auth?.user?.pendingAuth,
-    userToken: auth?.user?.userToken
-})
+const mapStateToProps = (state: any) => {
+    // TODO: refactor (ifce)
+  const localWords = state?.words?.words ? state.words.words : [];
+  const offlineWords = state.offline.words
+  const isOffline = state.situations.offline.network === NetworkSituation.OFFLINE
+                       || state.situations.energy.forcedOffline
+  const words = isOffline ? offlineWords : localWords;
+  return {
+    message: state?.auth?.user?.authMessage,
+    pendingAuth: state?.auth?.user?.pendingAuth,
+    userToken: state?.auth?.user?.userToken,
+    words,
+
+}
+}
 
 const mapDispatchToProps = (dispatch: Function) => ({
-  handleSignOut: () => {
+  handleSignOut: (localWords) => {
     dispatch(signOutRequest());
     firebase.auth()
       .signOut()
@@ -105,10 +141,17 @@ const mapDispatchToProps = (dispatch: Function) => ({
           console.log(err);
           dispatch(signOutFailure(err))
         });
+    dispatch(setForcedOffline(true))
+    dispatch(copyLocalState(localWords))
   },
 
   disableOfflineMode: () => {
     dispatch(setForcedOffline(false))
+  },
+
+  enableOfflineMode: (localWords) => {
+    dispatch(setForcedOffline(true))
+    dispatch(copyLocalState(localWords))
   }
 
 })

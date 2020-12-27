@@ -16,14 +16,14 @@ const setForcedOffline = (forcedOffline : boolean) => ({
   forcedOffline
 })
 
-const syncFailed = (syncFailed: boolean) => ({
-  type: adaptationConstants.SYNC_FAILED,
-  syncFailed
+const isSynchronized = (isSynchronized: boolean) => ({
+  type: adaptationConstants.IS_SYNCHRONIZED,
+  isSynchronized
 })
 
 export {
   setBatterySituation,
   setNetworkSituation,
   setForcedOffline,
-  syncFailed
+  isSynchronized
 }

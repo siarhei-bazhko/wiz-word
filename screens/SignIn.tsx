@@ -6,6 +6,7 @@ import { signInFailure, signInRequest, signInSuccess } from "../actions/authenti
 import { TextInput } from "react-native-paper";
 import { Button } from "../components";
 import { setForcedOffline } from "../actions/adaptationAction";
+import { copyLocalState } from "../actions/wordsAction";
 
 class SignIn extends React.Component {
   constructor(props: any) {
@@ -16,6 +17,11 @@ class SignIn extends React.Component {
     }
     this.handleUsername = this.handleUsername.bind(this);
     this.handlePassword = this.handlePassword.bind(this);
+    this.enableOfflineMode = this.enableOfflineMode.bind(this);
+  }
+
+  enableOfflineMode() {
+    this.props.enableOfflineMode(this.props.words)
   }
 
   handleUsername(username: string) {
@@ -54,7 +60,7 @@ class SignIn extends React.Component {
 
         <Button alignmentStyle={styles.buttonAlignment} buttonTitle="SIGN UP" iconType="exit-run" fn={ () => this.props.navigation.navigate("SignUp")} args={this.state}/>
 
-        <Button alignmentStyle={styles.buttonAlignment} buttonTitle="I want use app offline" iconType="alien" fn={this.props.enableOfflineMode} args={this.state}></Button>
+        <Button alignmentStyle={styles.buttonAlignment} buttonTitle="I want use app offline" iconType="alien" fn={this.enableOfflineMode} args={this.state}></Button>
       </View>
     );
   }
@@ -75,10 +81,11 @@ const styles = StyleSheet.create({
   }
 });
 
-const mapStateToProps = ({auth}: any) => ({
-    message: auth?.user?.authMessage,
-    pendingAuth: auth?.user?.pendingAuth,
-    userToken: auth?.user?.userToken
+const mapStateToProps = (state: any) => ({
+    message: state?.auth?.user?.authMessage,
+    pendingAuth: state?.auth?.user?.pendingAuth,
+    userToken: state?.auth?.user?.userToken,
+    words: state?.words?.words
 })
 
 const mapDispatchToProps = (dispatch: Function) => ({
@@ -90,12 +97,13 @@ const mapDispatchToProps = (dispatch: Function) => ({
         dispatch(signInSuccess(res.user.uid))
       })
       .catch((err)=> {
-        dispatch(signInFailure(err))
+        dispatch(signInFailure(err.toString()))
       });
   },
 
-  enableOfflineMode: () => {
+  enableOfflineMode: (localWords) => {
     dispatch(setForcedOffline(true))
+    dispatch(copyLocalState(localWords))
   }
 
 })
