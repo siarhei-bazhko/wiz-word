@@ -1,9 +1,11 @@
 type Word = {
   refId?: string,
-  id: string,
+  // id: string,
   origin: string,
   translation: string,
-  timestamp: number
+  timestamp: number,
+  totalRuns: number,
+  successRuns: number,
 }
 
 

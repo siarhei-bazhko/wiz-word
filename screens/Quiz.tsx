@@ -2,16 +2,17 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import { Button, Card, DataTable, Paragraph, TextInput, Title } from "react-native-paper";
 import { connect } from "react-redux";
-import { offlineUpdateStatsRequest, updateStatsRequest } from "../actions/wordsAction";
+import { offlineUpdateStats, updateStats } from "../actions/wordsAction";
 import { BatterySituation, NetworkSituation } from "../types/Adapation";
+import { Word } from "../types/Word";
 
  class Quiz extends React.Component {
 
   constructor(props : any) {
     super(props);
-    const words = [...this.props.words];
+    const words = JSON.parse(JSON.stringify(this.props.words));
     const totalWordsCount = words.length;
-    const doneWords = [];
+    const doneWords: Word[] = [];
     this.state = {
       words,
       doneWords,
@@ -53,20 +54,22 @@ import { BatterySituation, NetworkSituation } from "../types/Adapation";
       doneWordsCount: prev.doneWordsCount + 1,
       currentWord: remainWords[remainWords.length - 1],
     }))
-  }
 
-  componentDidUpdate () {
-    if(this.state.doneWordsCount === this.state.totalWordsCount) {
-      const correctWords = this.state.doneWords.reduce(((acc, word)=>{
-        return word.isCorrect ? acc + 1 : acc
-      }
-      ), 0);
-      const successRate = Math.round(correctWords / this.state.totalWordsCount * 100 *  10) / 10;
+    if(!remainWords.length) {
+      // const correctWords = this.state.doneWords.reduce(((acc, word)=>{
+      //   return word.isCorrect ? acc + 1 : acc
+      // }
+      // ), 0);
+      // const successRate = Math.round(correctWords / this.state.totalWordsCount * 100 *  10) / 10;
 
       const isOffline = this.props.network === NetworkSituation.OFFLINE
-                     || this.props.forcedOffline
-      const fn = isOffline ? offlineUpdateStatsRequest : updateStatsRequest
-      this.props.updateStats(fn, successRate);
+      || this.props.forcedOffline
+
+      const fn = isOffline
+        ? offlineUpdateStats(this.props.words, this.state.doneWords)
+        : updateStats(this.props.userToken, this.props.words, this.state.doneWords);
+      // this.props.updateStats(fn, successRate);
+      this.props.updateStats(fn)
     }
   }
 
@@ -160,13 +163,17 @@ const mapStateToProps = (state: any) => {
     words,
     network: state.situations.offline.network,
     forcedOffline: state.situations.energy.forcedOffline,
+    userToken: state?.auth?.user?.userToken
   }
 }
 
 const mapDispatchToProps = (dispatch: Function) => {
   return {
-    updateStats: (actionFunction: Function, successRate: number) => {
-      dispatch(actionFunction(successRate));
+    // updateStats: (actionFunction: Function, successRate: number) => {
+    //   dispatch(actionFunction(successRate));
+    // },
+    updateStats: (actionFunction: Function) => {
+      actionFunction(dispatch)
     }
   }
 }

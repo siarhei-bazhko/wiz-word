@@ -1,3 +1,4 @@
+import api from "../api/firebase";
 import wordsConstants from "../contants/wordsConstants"
 import { Word } from "../types/Word"
 
@@ -7,6 +8,31 @@ import { Word } from "../types/Word"
 // edit word
 // delete word
 // ----------------
+
+
+const updateWordStats = (words: Word[], quizWords: any) => {
+  const localWords = JSON.parse(JSON.stringify(words));
+  let wordsStats = JSON.parse(JSON.stringify(quizWords));
+  wordsStats = wordsStats.filter((word: any) => word.isCorrect);
+  localWords.forEach((word: Word) => {
+    wordsStats.forEach((correctWord: Word) => {
+      if(word.refId === correctWord.refId) {
+        word.successRuns += 1
+      }
+    });
+    word.totalRuns += 1
+  })
+
+  // compute success rate
+  let successRate = localWords.reduce((acc, word : Word) => {
+    acc += word.successRuns / word.totalRuns
+    return acc
+  }, 0)
+  successRate = Math.round(successRate / localWords.length * 100) * 100 / 100;
+
+  return { updatedWords: localWords, successRate }
+}
+
 
 const addWordRequest = () =>
   ({
@@ -38,7 +64,18 @@ const getWordsSuccess = (words: Word[]) => ({ type: wordsConstants.GET_WORDS_SUC
 
 const getWordsFailure = (err: string) => ({ type: wordsConstants.GET_WORDS_FAILURE, err })
 
-const updateStatsRequest = (successRate : number) => ({ type: wordsConstants.UPDATE_STATS_REQUEST, successRate })
+const updateStats =
+  (userToken, words, quizWordsStats : any) =>
+    async (dispatch: Function) => {
+      dispatch({ type: wordsConstants.UPDATE_STATS_REQUEST, isStatsUpdating: true })
+      const { updatedWords, successRate } = updateWordStats(words, quizWordsStats);
+      try {
+        await api(userToken).updateStats(updatedWords.map((word: Word)=>({successRuns: word.successRuns, totalRuns: word.totalRuns, refId: word.refId})));
+        dispatch({ type: wordsConstants.UPDATE_STATS_SUCCESS, updatedWords, successRate, isStatsUpdating: false })
+      } catch(err) {
+        dispatch({ type: wordsConstants.UPDATE_STATS_FAILURE, msg:JSON.stringify(err), isStatsUpdating: false})
+      }
+  }
 
 
 const offlineAddWord = (word: Word) => ({
@@ -55,10 +92,16 @@ const offlineDeleteWord = (id: string) => ({
   id
 })
 
-const offlineUpdateStatsRequest = (successRate : number) => ({
-  type: wordsConstants.OFFLINE_UPDATE_STATS_REQUEST,
-  successRate
-})
+const offlineUpdateStats =
+  (words, quizWordsStats) =>
+    (dispatch: Function) => {
+    const { updatedWords, successRate } = updateWordStats(words, quizWordsStats);
+    dispatch({
+      type: wordsConstants.OFFLINE_UPDATE_STATS,
+      updatedWords,
+      successRate
+    })
+}
 
 const copyLocalState = (localWords: Word[]) => ({
   type: wordsConstants.COPY_LOCAL_STATE,
@@ -99,14 +142,14 @@ export {
   addWordRequest, addWordSuccess, addWordFailure,
   deleteWordRequest, deleteWordSuccess, deleteWordFailure,
   getWordsRequest, getWordsSuccess, getWordsFailure,
-  updateStatsRequest,
+  updateStats,
 
   offlineAddWord,
   offlineGetWords,
   offlineDeleteWord,
-  offlineUpdateStatsRequest,
+  offlineUpdateStats,
 
-  
+
   copyLocalState,
   syncOfflineStateWithServerRequest,
   syncOfflineStateWithServerSuccess,

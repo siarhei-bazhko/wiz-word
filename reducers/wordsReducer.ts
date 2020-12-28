@@ -1,7 +1,9 @@
 import wordsConstants from "../contants/wordsConstants"
+import { Word } from "../types/Word"
 
 const initState =
 { words: [], isWordsFetching: false, isWordAdding: false, msg: "",  successRate: 0 }
+
 
 const wordsReducer = (state = initState, action: any) => {
   switch (action.type) {
@@ -14,8 +16,18 @@ const wordsReducer = (state = initState, action: any) => {
     case wordsConstants.ADD_WORD_FAILURE:
       return { ...state, isWordAdding: action.isWordAdding, message: action.err };
 
+    /** updating stats */
     case wordsConstants.UPDATE_STATS_REQUEST:
-      return { ...state, successRate: action.successRate }
+      return { ...state, isStatsUpdating: true }
+
+    case wordsConstants.UPDATE_STATS_SUCCESS:
+      return { ...state, successRate: action.successRate, words: action.updatedWords, isStatsUpdating: false }
+
+    case wordsConstants.UPDATE_STATS_FAILURE:
+      return { ...state, msg: action.msg, isStatsUpdating: false }
+
+
+
 
     case wordsConstants.GET_WORDS_REQUEST:
       // TODO: add to action

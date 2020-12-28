@@ -13,7 +13,8 @@ import api from '../../api/firebase';
 
 
 type InputWrapperProps = {
-  addWord: Function
+  addWord: Function,
+  userToken: string
 }
 
 class InputsWrapper extends React.Component<InputWrapperProps, Word> {
@@ -22,7 +23,9 @@ class InputsWrapper extends React.Component<InputWrapperProps, Word> {
       this.state = {
         refId: generateWordId(),
         origin: "",
-        translation: ""
+        translation: "",
+        totalRuns: 0,
+        successRuns: 0,
       }
 
     this.updateOriginInput = this.updateOriginInput.bind(this);

@@ -67,7 +67,20 @@ function api(userId: string) {
     }
   }
 
-  return { addFlashcard, getFlashcards, deleteFlashcard, syncOfflineWithServer };
+  async function updateStats(updatedWords) {
+    try {
+      const batch = fs.batch();
+      updatedWords.forEach(word => {
+      const ref = fs.collection("users").doc(userId).collection("flashcards").doc(word.refId);
+      batch.update(ref, word)
+      })
+      await batch.commit()
+    } catch(err) {
+      console.log(err);
+    }
+  }
+
+  return { addFlashcard, getFlashcards, deleteFlashcard, syncOfflineWithServer, updateStats };
 }
 
 export default api;
