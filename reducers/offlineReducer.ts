@@ -6,6 +6,9 @@ const initOfflineState =
 
 const deleteWord = (id: number, state: any) => (state.words.filter(word => word.refId !== id))
 
+const deleteFromAddedList = (id: number, state: any) => (state.addedList.filter(word => word.refId !== id))
+// const deleteFromDeletedList = (id: number, state: any) => (state.deletedList.filter(_id => _id !== id))
+
 const copyWords = (words: Word[]) => (JSON.parse(JSON.stringify(words)))
 
 const offlineWordsReducer = (state = initOfflineState, action: any) => {
@@ -19,7 +22,10 @@ const offlineWordsReducer = (state = initOfflineState, action: any) => {
       return { ...state };
 
     case wordsConstants.OFFLINE_DELETE_WORD:
-      return { ...state, words: deleteWord(action.id, state) }
+      return { ...state,
+         words: deleteWord(action.id, state),
+         addedList: deleteFromAddedList(action.id, state),
+        }
 
     case wordsConstants.OFFLINE_UPDATE_STATS:
       return { ...state, successRate: action.successRate, words: action.updatedWords }

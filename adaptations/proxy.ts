@@ -55,8 +55,8 @@ async function deleteFlashcard(dispatch: Function, userToken: string, id: string
 
   if(network === NetworkSituation.OFFLINE || forcedOffline){
     console.log("DELETE: You are offline! So Nothing IS stored YET");
-    dispatch(offlineDeleteWord(id))
     dispatch(addToDeletedList(id));
+    dispatch(offlineDeleteWord(id))
 
     return
   }

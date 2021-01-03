@@ -68,6 +68,7 @@ async function checkBatterySituation() {
       case batteryState === Battery.BatteryState.CHARGING:
         situation = BatterySituation.CHARGING
         break;
+
       case batteryLevel > 0.2 && batteryLevel <= 0.50:
         situation = BatterySituation.MEDIUM_BATTERY
         // TODO: disable dictionary API
@@ -86,6 +87,7 @@ async function checkBatterySituation() {
           store.dispatch(setForcedOffline(false))
         }
         break;
+
       case batteryLevel <= 0.2:
         situation = BatterySituation.LOW_BATTERY
         if(!prevForcedOffline) {
@@ -93,6 +95,7 @@ async function checkBatterySituation() {
           store.dispatch(copyLocalState(store.getState().words.words));
         }
         break;
+        
       default:
         situation = BatterySituation.GOOD_BATTERY
         break;
