@@ -21,16 +21,20 @@ import { getFlashcards } from './proxy';
 const CHECK_FREQUENCY = 100;
 
 function init() {
-  setInterval(situationChecker, CHECK_FREQUENCY);
+  situationChecker()
 }
 
 function situationChecker() {
-  checkBatterySituation();
-  checkNetworkSituation();
-  checkForcedOffline();
+  setTimeout(async () => {
+    await checkBatterySituation();
+    await checkNetworkSituation();
+    await checkForcedOffline();
+
+    situationChecker();
+  }, CHECK_FREQUENCY)
 }
 
-function checkForcedOffline() {
+async function checkForcedOffline() {
   const forcedOffline = store.getState().situations.energy.forcedOffline;
   const isSync = store.getState().situations.isSynchronized;
   const token = store.getState().auth.user.userToken;
@@ -38,11 +42,11 @@ function checkForcedOffline() {
   if(!forcedOffline && !isSync && token !== null && token !== undefined) {
     //set is_sync:true
     store.dispatch(isSynchronized(true))
-    syncDB()
+    await syncDB()
   } else if (forcedOffline) { // we are offline
     //TODO: reduce calls (add in add/delete func)
     //set is_sync: false
-    if(isSync === false) {
+    if(!isSync) {
       return
     }
     store.dispatch(isSynchronized(false))
@@ -52,53 +56,53 @@ function checkForcedOffline() {
 }
 
 async function checkBatterySituation() {
-
+  if(store.getState().situations.offline.network === NetworkSituation.OFFLINE) {
+    return
+  }
   try {
     const { batteryLevel, batteryState } = await Battery.getPowerStateAsync();
     const prevSituation = store.getState().situations.energy.status;
+    const prevForcedOffline = store.getState().situations.energy.forcedOffline;
     let situation = BatterySituation.CHARGING;
     switch (true) {
       case batteryState === Battery.BatteryState.CHARGING:
         situation = BatterySituation.CHARGING
         break;
-      // case batteryLevel > 0.15 && batteryLevel <= 0.3:
-      //   situation = BatterySituation.MEDIUM_BATTERY
-      //   break;
-      case batteryLevel <= 0.70:
-        situation = BatterySituation.LOW_BATTERY
-        break;
-      default:
-        situation = BatterySituation.GOOD_BATTERY
-        break;
-      }
-
-    // if(store.getState().situations.energy.forcedOffline) {
-    //   return
-    // }
-    // const lastSyncFailed = store.getState().situations.syncFailed;
-    if(prevSituation !== situation) {
-      if(situation === BatterySituation.LOW_BATTERY) {
-        console.log("Low battery :: goto offline + disable dictionary api + notify user");
-        // forced offline
-        const prevForcedOffline = store.getState().situations.energy.forcedOffline;
+      case batteryLevel > 0.2 && batteryLevel <= 0.50:
+        situation = BatterySituation.MEDIUM_BATTERY
+        // TODO: disable dictionary API
+        // TODO: decrease sync frequency
         if(!prevForcedOffline) {
           store.dispatch(setForcedOffline(true))
           store.dispatch(copyLocalState(store.getState().words.words));
         }
-      }
+        // count # of actions we will "buffer" (# of add and delete)
+        const addArrayLength = store.getState().offline.addedList.length;
+        const deletedArrayLength = store.getState().offline.deletedList.length;
+        // when # > threshold (5) => go online again
+        if(addArrayLength + deletedArrayLength >= 5) {
+          // bad hack :(
+          await syncDB()
+          store.dispatch(setForcedOffline(false))
+        }
+        break;
+      case batteryLevel <= 0.2:
+        situation = BatterySituation.LOW_BATTERY
+        if(!prevForcedOffline) {
+          store.dispatch(setForcedOffline(true))
+          store.dispatch(copyLocalState(store.getState().words.words));
+        }
+        break;
+      default:
+        situation = BatterySituation.GOOD_BATTERY
+        break;
+    }
 
-
-      if(prevSituation === BatterySituation.LOW_BATTERY) {
-        syncDB()
+    if(prevSituation !== situation) {
+      if(prevSituation === BatterySituation.LOW_BATTERY || prevSituation === BatterySituation.MEDIUM_BATTERY) {
+        await syncDB()
         store.dispatch(setForcedOffline(false))
       }
-
-      // if(situation === BatterySituation.MEDIUM_BATTERY) {
-      //   console.log(" 15 -- 30  situation");
-
-      //   // TODO: disable dictionary API
-      //   // TODO: decrease sync frequency
-      // }
       //change situation (last action)
       store.dispatch(setBatterySituation(situation))
     }
@@ -108,9 +112,6 @@ async function checkBatterySituation() {
 }
 
 async function checkNetworkSituation() {
-  // if(store.getState().situations.energy.forcedOffline) {
-  //   return
-  // }
   try {
     // const isOffline = await Network.isAirplaneModeEnabledAsync();
     const { isInternetReachable: isOnline } = await Network.getNetworkStateAsync();
@@ -118,7 +119,6 @@ async function checkNetworkSituation() {
     const prevNetworkState = store.getState().situations.offline.network;
     const prevIsOffline = prevNetworkState === NetworkSituation.OFFLINE ? true : false;
 
-    // const lastSyncFailed = store.getState().situations.syncFailed;
     // always change situation on change
     const isSituationChanged = isOffline !== prevIsOffline;
     if(isSituationChanged) {
@@ -127,19 +127,16 @@ async function checkNetworkSituation() {
       const server = isOffline ? NetworkSituation.SERVER_UNAVALIABLE : NetworkSituation.SERVER_AVALIABLE;
 
       if(isOffline) {
-        // can copy local state
         store.dispatch(copyLocalState(store.getState().words.words));
       }
 
       if(isOnline) {
-        // can sync db
-        syncDB()
+        await syncDB()
         // store.dispatch(setForcedOffline(false))
       }
       //change situation
       store.dispatch(setNetworkSituation({ network, server }))
     }
-
   } catch (err) {
     console.log(err);
   }
@@ -162,12 +159,10 @@ async function syncDB() {
     const words: Word[] = await getFlashcards(store.dispatch, token)
     store.dispatch(getWordsSuccess(words));
     store.dispatch(syncOfflineStateWithServerSuccess())
-    return
   } catch(err) {
     console.log("CANT SYNC");
     store.dispatch(syncOfflineStateWithServerFailure())
     store.dispatch(getWordsFailure(`adaptation: can't fetch words ${err}`))
-    return
   }
 }
 
