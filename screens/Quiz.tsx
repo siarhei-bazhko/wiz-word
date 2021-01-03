@@ -63,7 +63,7 @@ import { Word } from "../types/Word";
       // const successRate = Math.round(correctWords / this.state.totalWordsCount * 100 *  10) / 10;
 
       const isOffline = this.props.network === NetworkSituation.OFFLINE
-      || this.props.forcedOffline
+      || this.props.forcedOffline || this.props.energyOffline;
 
       const fn = isOffline
         ? offlineUpdateStats(this.props.words, this.state.doneWords)
@@ -157,12 +157,13 @@ const mapStateToProps = (state: any) => {
   const localWords = state?.words?.words ? state.words.words : [];
   const offlineWords = state.offline.words
   const isOffline = state.situations.offline.network === NetworkSituation.OFFLINE
-                 || state.situations.energy.forcedOffline
+                       || (state.situations.energy.energyOffline && !state.situations.forcedOffline)
   const words = isOffline ? offlineWords : localWords;
   return {
     words,
     network: state.situations.offline.network,
-    forcedOffline: state.situations.energy.forcedOffline,
+    forcedOffline: state.situations.forcedOffline,
+    energyOffline: state.situations.energy.energyOffline,
     userToken: state?.auth?.user?.userToken
   }
 }

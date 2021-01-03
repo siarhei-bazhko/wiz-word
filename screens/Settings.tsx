@@ -13,10 +13,15 @@ class Settings extends React.Component {
     super(props)
 
     this.enableOfflineMode = this.enableOfflineMode.bind(this)
+    this.disableOfflineMode = this.disableOfflineMode.bind(this)
   }
 
   enableOfflineMode() {
     this.props.enableOfflineMode(this.props.words)
+  }
+
+  disableOfflineMode() {
+    this.props.disableOfflineMode(this.props.words)
   }
 
   handleSignOut() {
@@ -63,8 +68,8 @@ class Settings extends React.Component {
           mode="contained"
           color="green"
           style={styles.onlineButtonStyle}
-          onPress={() => this.props.disableOfflineMode()}>
-          Go Online
+          onPress={() => this.disableOfflineMode()}>
+          Not ignore energy
         </Button>
 
         <Button
@@ -73,7 +78,7 @@ class Settings extends React.Component {
           color="red"
           style={styles.offlineButtonStyle}
           onPress={() => {this.enableOfflineMode()}}>
-          Go Offline
+          Ingore energy
         </Button>
 
       </View>
@@ -117,7 +122,7 @@ const mapStateToProps = (state: any) => {
   const localWords = state?.words?.words ? state.words.words : [];
   const offlineWords = state.offline.words
   const isOffline = state.situations.offline.network === NetworkSituation.OFFLINE
-                       || state.situations.energy.forcedOffline
+                       || (state.situations.energy.energyOffline && !state.situations.forcedOffline)
   const words = isOffline ? offlineWords : localWords;
   return {
     message: state?.auth?.user?.authMessage,
@@ -145,8 +150,9 @@ const mapDispatchToProps = (dispatch: Function) => ({
     dispatch(copyLocalState(localWords))
   },
 
-  disableOfflineMode: () => {
+  disableOfflineMode: (localWords) => {
     dispatch(setForcedOffline(false))
+    dispatch(copyLocalState(localWords))
   },
 
   enableOfflineMode: (localWords) => {

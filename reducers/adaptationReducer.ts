@@ -4,13 +4,14 @@ import { BatterySituation, NetworkSituation } from "../types/Adapation";
 const initState = {
   energy: {
     status: BatterySituation.CHARGING,
-    forcedOffline: false
+    energyOffline: false
   },
   offline: {
-      network: NetworkSituation.OFFLINE,
-      server: NetworkSituation.SERVER_UNAVALIABLE
+    network: NetworkSituation.OFFLINE,
+    server: NetworkSituation.SERVER_UNAVALIABLE
   },
-  isSynchronized: false,
+  forcedOffline: false,
+  isSynchronized: true,
 }
 
 const adaptationReducer = (state = initState, action: any) => {
@@ -23,8 +24,9 @@ const adaptationReducer = (state = initState, action: any) => {
 
     case adaptationConstants.FORCED_OFFLINE:
       // TODO: copy local state in case "true"
-      return { ...state, energy: { ...state.energy, forcedOffline: action.forcedOffline } }
-
+      return { ...state, forcedOffline: action.forcedOffline }
+    case adaptationConstants.ENERGY_OFFLINE:
+      return { ...state, energy: {...state.energy, energyOffline: action.energyOffline }}
     case adaptationConstants.IS_SYNCHRONIZED:
       return { ...state, isSynchronized: action.isSynchronized}
     default:

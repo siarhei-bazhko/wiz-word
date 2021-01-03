@@ -64,7 +64,8 @@ const mapStateToProps = (state: any) => {
   const localWords = state?.words?.words ? state.words.words : [];
   const offlineWords = state.offline.words
   const isOffline = state.situations.offline.network === NetworkSituation.OFFLINE
-                       || state.situations.energy.forcedOffline
+                       || (state.situations.energy.energyOffline && !state.situations.forcedOffline)
+                      //  || state.situations.energy.energyOffline
   const words = isOffline ? offlineWords : localWords;
   const successRate = isOffline
                       ? state.offline.successRate

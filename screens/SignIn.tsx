@@ -95,6 +95,7 @@ const mapDispatchToProps = (dispatch: Function) => ({
       .signInWithEmailAndPassword(credentials.username, credentials.password)
       .then((res)=>{
         dispatch(signInSuccess(res.user.uid))
+        dispatch(setForcedOffline(false))
       })
       .catch((err)=> {
         dispatch(signInFailure(err.toString()))

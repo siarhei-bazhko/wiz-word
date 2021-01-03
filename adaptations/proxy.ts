@@ -18,10 +18,10 @@ import { BatterySituation, NetworkSituation } from "../types/Adapation";
 
 function addFlashcard(dispatch: Function, userToken: string, newWordPair: Word) {
   const network = store.getState().situations.offline.network;
-  const forcedOffline = store.getState().situations.energy.forcedOffline;
+  const forcedOffline = store.getState().situations.forcedOffline;
+  const energyOffline = store.getState().situations.energy.energyOffline;
 
-  if(network === NetworkSituation.OFFLINE || forcedOffline){
-    console.log("ADD: You are offline! So Nothing IS stored YET");
+  if(network === NetworkSituation.OFFLINE || !forcedOffline && energyOffline){
     dispatch(offlineAddWord(newWordPair))
     return
   }
@@ -51,13 +51,12 @@ function addFlashcard(dispatch: Function, userToken: string, newWordPair: Word) 
 
 async function deleteFlashcard(dispatch: Function, userToken: string, id: string | number) {
   const network = store.getState().situations.offline.network;
-  const forcedOffline = store.getState().situations.energy.forcedOffline;
+  const forcedOffline = store.getState().situations.forcedOffline;
+  const energyOffline = store.getState().situations.energy.energyOffline;
 
-  if(network === NetworkSituation.OFFLINE || forcedOffline){
-    console.log("DELETE: You are offline! So Nothing IS stored YET");
+  if(network === NetworkSituation.OFFLINE || !forcedOffline && energyOffline){
     dispatch(addToDeletedList(id));
     dispatch(offlineDeleteWord(id))
-
     return
   }
 
@@ -83,9 +82,10 @@ async function deleteFlashcard(dispatch: Function, userToken: string, id: string
 
 function getFlashcards(dispatch: Function, userToken : string) {
   const network = store.getState().situations.offline.network;
-  const forcedOffline = store.getState().situations.energy.forcedOffline;
+  const forcedOffline = store.getState().situations.forcedOffline;
+  const energyOffline = store.getState().situations.energy.energyOffline;
 
-  if(network === NetworkSituation.OFFLINE || forcedOffline){
+  if(network === NetworkSituation.OFFLINE || !forcedOffline && energyOffline){
     console.log("GET:// You are offline! So Nothing IS stored YET");
     dispatch(offlineGetWords());
     return

@@ -2,7 +2,7 @@ import wordsConstants from "../contants/wordsConstants"
 import { Word } from "../types/Word"
 
 const initOfflineState =
-{ words: [],  successRate: 0, deletedList: [], addedList: [] }
+{ words: [],  successRate: 0, deletedList: [], addedList: [], syncOfflineState:false  }
 
 const deleteWord = (id: number, state: any) => (state.words.filter(word => word.refId !== id))
 

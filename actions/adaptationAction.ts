@@ -1,3 +1,4 @@
+import { syncDB } from "../adaptations"
 import adaptationConstants from "../contants/adaptationConstants"
 import { BatterySituation, NetworkSituation } from "../types/Adapation"
 
@@ -11,9 +12,15 @@ const setNetworkSituation = (offline: { network: NetworkSituation, server: Netwo
   offline
 })
 
-const setForcedOffline = (forcedOffline : boolean) => ({
-  type: adaptationConstants.FORCED_OFFLINE,
-  forcedOffline
+const setForcedOffline = ( forcedOffline : boolean) => ({
+    type: adaptationConstants.FORCED_OFFLINE,
+    forcedOffline
+  })
+
+const setEnergyOffline = (energyOffline : boolean) => ({
+    type: adaptationConstants.ENERGY_OFFLINE,
+    energyOffline
+
 })
 
 const isSynchronized = (isSynchronized: boolean) => ({
@@ -24,6 +31,9 @@ const isSynchronized = (isSynchronized: boolean) => ({
 export {
   setBatterySituation,
   setNetworkSituation,
+
   setForcedOffline,
+  setEnergyOffline,
+
   isSynchronized
 }

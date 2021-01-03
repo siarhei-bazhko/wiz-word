@@ -2,7 +2,7 @@ import * as Battery from 'expo-battery';
 import * as Network from 'expo-network';
 
 import { store } from "../helpers/reduxStore";
-import { isSynchronized, setBatterySituation, setForcedOffline, setNetworkSituation } from "../actions/adaptationAction";
+import { isSynchronized, setBatterySituation, setEnergyOffline, setForcedOffline, setNetworkSituation } from "../actions/adaptationAction";
 import { BatterySituation, NetworkSituation, UserNotification } from '../types/Adapation';
 import {
   copyLocalState,
@@ -20,7 +20,7 @@ import { getFlashcards } from './proxy';
 
 const CHECK_FREQUENCY = 100;
 
-function init() {
+async function init() {
   situationChecker()
 }
 
@@ -35,16 +35,14 @@ function situationChecker() {
 }
 
 async function checkForcedOffline() {
-  const forcedOffline = store.getState().situations.energy.forcedOffline;
+  const forcedOffline = store.getState().situations.forcedOffline;
   const isSync = store.getState().situations.isSynchronized;
   const token = store.getState().auth.user.userToken;
 
-  if(!forcedOffline && !isSync && token !== null && token !== undefined) {
+  if(forcedOffline && !isSync && token !== null && token !== undefined) {
     //set is_sync:true
-    store.dispatch(isSynchronized(true))
     await syncDB()
-  } else if (forcedOffline) { // we are offline
-    //TODO: reduce calls (add in add/delete func)
+  } else if (!forcedOffline) { // we are offline
     //set is_sync: false
     if(!isSync) {
       return
@@ -56,25 +54,27 @@ async function checkForcedOffline() {
 }
 
 async function checkBatterySituation() {
-  if(store.getState().situations.offline.network === NetworkSituation.OFFLINE) {
+  if(store.getState().situations.offline.network === NetworkSituation.OFFLINE || store.getState().situations.forcedOffline) {
+    // console.log("store.getState().situations.forcedOffline" + store.getState().situations.forcedOffline);
+
     return
   }
   try {
     const { batteryLevel, batteryState } = await Battery.getPowerStateAsync();
     const prevSituation = store.getState().situations.energy.status;
-    const prevForcedOffline = store.getState().situations.energy.forcedOffline;
+    const prevEnergyOffline = store.getState().situations.energy.energyOffline;
     let situation = BatterySituation.CHARGING;
     switch (true) {
       case batteryState === Battery.BatteryState.CHARGING:
         situation = BatterySituation.CHARGING
         break;
 
-      case batteryLevel > 0.2 && batteryLevel <= 0.50:
+      case batteryLevel > 0.3 && batteryLevel <= 0.70:
         situation = BatterySituation.MEDIUM_BATTERY
         // TODO: disable dictionary API
         // TODO: decrease sync frequency
-        if(!prevForcedOffline) {
-          store.dispatch(setForcedOffline(true))
+        if(!prevEnergyOffline) {
+          store.dispatch(setEnergyOffline(true))
           store.dispatch(copyLocalState(store.getState().words.words));
         }
         // count # of actions we will "buffer" (# of add and delete)
@@ -84,18 +84,18 @@ async function checkBatterySituation() {
         if(addArrayLength + deletedArrayLength >= 5) {
           // bad hack :(
           await syncDB()
-          store.dispatch(setForcedOffline(false))
+          store.dispatch(setEnergyOffline(false))
         }
         break;
 
-      case batteryLevel <= 0.2:
+      case batteryLevel <= 0.3:
         situation = BatterySituation.LOW_BATTERY
-        if(!prevForcedOffline) {
-          store.dispatch(setForcedOffline(true))
+        if(!prevEnergyOffline) {
+          store.dispatch(setEnergyOffline(true))
           store.dispatch(copyLocalState(store.getState().words.words));
         }
         break;
-        
+
       default:
         situation = BatterySituation.GOOD_BATTERY
         break;
@@ -104,7 +104,7 @@ async function checkBatterySituation() {
     if(prevSituation !== situation) {
       if(prevSituation === BatterySituation.LOW_BATTERY || prevSituation === BatterySituation.MEDIUM_BATTERY) {
         await syncDB()
-        store.dispatch(setForcedOffline(false))
+        store.dispatch(setEnergyOffline(false))
       }
       //change situation (last action)
       store.dispatch(setBatterySituation(situation))
@@ -115,6 +115,9 @@ async function checkBatterySituation() {
 }
 
 async function checkNetworkSituation() {
+  if(store.getState().situations.forcedOffline || store.getState().situations.energy.energyOffline) {
+    return
+  }
   try {
     // const isOffline = await Network.isAirplaneModeEnabledAsync();
     const { isInternetReachable: isOnline } = await Network.getNetworkStateAsync();
@@ -147,10 +150,14 @@ async function checkNetworkSituation() {
 
 async function syncDB() {
   const token = store.getState().auth.user.userToken;
-  const forcedOffline = store.getState().situations.energy.forcedOffline;
-  if(forcedOffline || token === undefined || token === null) {
+  // const forcedOffline = store.getState().situations.forcedOffline;
+  // const energyOffline = store.getState().situations.energy.energyOffline;
+  if(token === undefined || token === null) {
+    console.log("something is false");
+
     return
   }
+  console.log("all ok. Staring Sync!");
 
   const delBuffer = store.getState().offline.deletedList;
   const addBuffer = store.getState().offline.addedList;
@@ -159,18 +166,23 @@ async function syncDB() {
     await api(token).syncOfflineWithServer(addBuffer, delBuffer);
     store.dispatch(resetLists())
     store.dispatch(getWordsRequest())
-    const words: Word[] = await getFlashcards(store.dispatch, token)
+    const words: Word[] = await api(token).getFlashcards()
+    if(words === undefined) {
+      console.log("CANT");
+      throw new Error("Cant get words");
+    }
     store.dispatch(getWordsSuccess(words));
     store.dispatch(syncOfflineStateWithServerSuccess())
+    store.dispatch(isSynchronized(true))
   } catch(err) {
-    console.log("CANT SYNC");
+    store.dispatch(isSynchronized(false))
     store.dispatch(syncOfflineStateWithServerFailure())
     store.dispatch(getWordsFailure(`adaptation: can't fetch words ${err}`))
   }
 }
 
-function notifyUser(notificationType: UserNotification) {
-
-}
-
 export default init;
+
+export {
+  syncDB
+}
