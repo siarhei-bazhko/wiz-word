@@ -55,9 +55,7 @@ async function checkForcedOffline() {
 
 async function checkBatterySituation() {
   if(store.getState().situations.offline.network === NetworkSituation.OFFLINE || store.getState().situations.forcedOffline) {
-    // console.log("store.getState().situations.forcedOffline" + store.getState().situations.forcedOffline);
-
-    return
+   return
   }
   try {
     const { batteryLevel, batteryState } = await Battery.getPowerStateAsync();
@@ -71,8 +69,7 @@ async function checkBatterySituation() {
 
       case batteryLevel > 0.3 && batteryLevel <= 0.70:
         situation = BatterySituation.MEDIUM_BATTERY
-        // TODO: disable dictionary API
-        // TODO: decrease sync frequency
+
         if(!prevEnergyOffline) {
           store.dispatch(setEnergyOffline(true))
           store.dispatch(copyLocalState(store.getState().words.words));
@@ -115,11 +112,10 @@ async function checkBatterySituation() {
 }
 
 async function checkNetworkSituation() {
-  if(store.getState().situations.forcedOffline || store.getState().situations.energy.energyOffline) {
-    return
-  }
+  // if(store.getState().situations.forcedOffline || store.getState().situations.energy.energyOffline) {
+  //   return
+  // }
   try {
-    // const isOffline = await Network.isAirplaneModeEnabledAsync();
     const { isInternetReachable: isOnline } = await Network.getNetworkStateAsync();
     const isOffline = !isOnline;
     const prevNetworkState = store.getState().situations.offline.network;
@@ -132,7 +128,7 @@ async function checkNetworkSituation() {
       // TODO: add server check for avalaibility
       const server = isOffline ? NetworkSituation.SERVER_UNAVALIABLE : NetworkSituation.SERVER_AVALIABLE;
 
-      if(isOffline) {
+      if(isOffline && !store.getState().situations.energy.energyOffline) {
         store.dispatch(copyLocalState(store.getState().words.words));
       }
 
