@@ -17,6 +17,7 @@ import {
 import { Word } from '../types/Word';
 import api from '../api/firebase';
 import { getFlashcards } from './proxy';
+import { updateWordStats } from '../helpers';
 
 const CHECK_FREQUENCY = 100;
 
@@ -67,8 +68,13 @@ async function checkBatterySituation() {
         situation = BatterySituation.CHARGING
         break;
 
-      case batteryLevel > 0.3 && batteryLevel <= 0.70:
+      case batteryLevel > 0.10 && batteryLevel <= 0.70:
         situation = BatterySituation.MEDIUM_BATTERY
+        // on init
+        if(!store.getState().offline.words.length && !store.getState().words.words.length) {
+          await syncDB()
+          store.dispatch(copyLocalState(store.getState().words.words));
+        }
 
         if(!prevEnergyOffline) {
           store.dispatch(setEnergyOffline(true))
@@ -85,7 +91,7 @@ async function checkBatterySituation() {
         }
         break;
 
-      case batteryLevel <= 0.3:
+      case batteryLevel <= 0.10:
         situation = BatterySituation.LOW_BATTERY
         if(!prevEnergyOffline) {
           store.dispatch(setEnergyOffline(true))
@@ -128,13 +134,14 @@ async function checkNetworkSituation() {
       // TODO: add server check for avalaibility
       const server = isOffline ? NetworkSituation.SERVER_UNAVALIABLE : NetworkSituation.SERVER_AVALIABLE;
 
-      if(isOffline && !store.getState().situations.energy.energyOffline) {
+      if(isOffline && !store.getState().situations.energy.energyOffline && !store.getState().situations.forcedOffline) {
         store.dispatch(copyLocalState(store.getState().words.words));
       }
 
       if(isOnline) {
         await syncDB()
         // store.dispatch(setForcedOffline(false))
+        store.dispatch(copyLocalState(store.getState().words.words));
       }
       //change situation
       store.dispatch(setNetworkSituation({ network, server }))
@@ -159,12 +166,13 @@ async function syncDB() {
   const addBuffer = store.getState().offline.addedList;
   try {
     store.dispatch(syncOfflineStateWithServerRequest())
-    await api(token).syncOfflineWithServer(addBuffer, delBuffer);
+    await api(token).syncOfflineWithServer(getNewWords(), delBuffer, getOldWords());
+
     store.dispatch(resetLists())
     store.dispatch(getWordsRequest())
+
     const words: Word[] = await api(token).getFlashcards()
     if(words === undefined) {
-      console.log("CANT");
       throw new Error("Cant get words");
     }
     store.dispatch(getWordsSuccess(words));
@@ -175,6 +183,20 @@ async function syncDB() {
     store.dispatch(syncOfflineStateWithServerFailure())
     store.dispatch(getWordsFailure(`adaptation: can't fetch words ${err}`))
   }
+}
+
+function getOldWords() {
+  return store.getState().offline.words.filter(({refId}) => {
+  return store.getState().offline.addedList.map(e=>e.refId).indexOf(refId) < 0;
+  })
+}
+
+// TODO: redo in future!!!
+// just for updated stats
+function getNewWords() {
+    return store.getState().offline.words.filter(({refId}) => {
+    return store.getState().offline.addedList.map(e=>e.refId).indexOf(refId) >= 0;
+  })
 }
 
 export default init;

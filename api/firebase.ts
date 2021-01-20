@@ -48,9 +48,13 @@ function api(userId: string) {
     }
   }
 
-  async function syncOfflineWithServer(addedArray:Word[], deletedArray) {
+  async function syncOfflineWithServer(addedArray:Word[], deletedArray, updatedWords) {
     try {
       const batch = fs.batch();
+      updatedWords.forEach(word => {
+      const ref = fs.collection("users").doc(userId).collection("flashcards").doc(word.refId);
+      batch.update(ref, word)
+      })
       deletedArray.forEach(id => {
         const ref = fs.collection("users").doc(userId).collection("flashcards").doc(id)
         batch.delete(ref);
@@ -61,6 +65,8 @@ function api(userId: string) {
       const ref = fs.collection("users").doc(userId).collection("flashcards").doc();
       batch.set(ref, doc)
       })
+
+
       const res = await batch.commit();
     } catch (err) {
       console.log(err);

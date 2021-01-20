@@ -1,13 +1,19 @@
 import React from "react";
 import { View, StyleSheet, Text } from "react-native";
 import { connect } from "react-redux";
+import { getFlashcards } from "../adaptations/proxy";
+import api from "../api/firebase";
 import { WordDaily, Button, Statistics } from "../components";
-import { daysIntoYear } from "../helpers/helpers";
+import { daysIntoYear, updateWordStats } from "../helpers/helpers";
 import { BatterySituation, NetworkSituation } from "../types/Adapation";
 
 class Home extends React.Component {
   constructor(props: any){
     super(props);
+  }
+
+  componentDidMount() {
+    getFlashcards(this.props.dispatch, this.props.userToken);
   }
 
   render () {
@@ -69,9 +75,13 @@ const mapStateToProps = (state: any) => {
   const words = isOffline ? offlineWords : localWords;
   const successRate = isOffline
                       ? state.offline.successRate
-                      : state.words.successRate;
+                      : Math.round(localWords.reduce((acc, word : Word) => {
+                        acc += word.successRuns / word.totalRuns
+                        return acc
+                        }, 0) / localWords.length * 100) * 100 / 100;
 
   return {
+    userToken: state.auth?.user?.userToken,
     isOffline,
     successRate,
     wordCount: words?.length,

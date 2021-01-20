@@ -1,5 +1,6 @@
 import api from "../api/firebase";
 import wordsConstants from "../contants/wordsConstants"
+import { updateWordStats } from "../helpers";
 import { Word } from "../types/Word"
 
 // ----------------
@@ -8,31 +9,6 @@ import { Word } from "../types/Word"
 // edit word
 // delete word
 // ----------------
-
-
-const updateWordStats = (words: Word[], quizWords: any) => {
-  const localWords = JSON.parse(JSON.stringify(words));
-  let wordsStats = JSON.parse(JSON.stringify(quizWords));
-  wordsStats = wordsStats.filter((word: any) => word.isCorrect);
-  localWords.forEach((word: Word) => {
-    wordsStats.forEach((correctWord: Word) => {
-      if(word.refId === correctWord.refId) {
-        word.successRuns += 1
-      }
-    });
-    word.totalRuns += 1
-  })
-
-  // compute success rate
-  let successRate = localWords.reduce((acc, word : Word) => {
-    acc += word.successRuns / word.totalRuns
-    return acc
-  }, 0)
-  successRate = Math.round(successRate / localWords.length * 100) * 100 / 100;
-
-  return { updatedWords: localWords, successRate }
-}
-
 
 const addWordRequest = () =>
   ({
@@ -68,6 +44,8 @@ const updateStats =
   (userToken, words, quizWordsStats : any) =>
     async (dispatch: Function) => {
       dispatch({ type: wordsConstants.UPDATE_STATS_REQUEST, isStatsUpdating: true })
+      console.log(quizWordsStats);
+
       const { updatedWords, successRate } = updateWordStats(words, quizWordsStats);
       try {
         await api(userToken).updateStats(updatedWords.map((word: Word)=>({successRuns: word.successRuns, totalRuns: word.totalRuns, refId: word.refId})));

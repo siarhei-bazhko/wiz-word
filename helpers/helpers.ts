@@ -12,4 +12,27 @@ const daysIntoYear = (date: Date) => {
     return (Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) - Date.UTC(date.getFullYear(), 0, 0)) / 24 / 60 / 60 / 1000;
 }
 
-export  { generateWordId, randomWord, daysIntoYear};
+const updateWordStats = (words: Word[], quizWords: any) => {
+  const localWords = JSON.parse(JSON.stringify(words));
+  let wordsStats = JSON.parse(JSON.stringify(quizWords));
+  wordsStats = wordsStats.filter((word: any) => word.isCorrect);
+  localWords.forEach((word: Word) => {
+    wordsStats.forEach((correctWord: Word) => {
+      if(word.refId === correctWord.refId) {
+        word.successRuns += 1
+      }
+    });
+    word.totalRuns += 1
+  })
+
+  // compute success rate
+  let successRate = localWords.reduce((acc, word : Word) => {
+    acc += word.successRuns / word.totalRuns
+    return acc
+  }, 0)
+  successRate = Math.round(successRate / localWords.length * 100) * 100 / 100;
+
+  return { updatedWords: localWords, successRate }
+}
+
+export  { generateWordId, randomWord, daysIntoYear, updateWordStats};

@@ -13,7 +13,7 @@ export default function Statistics({ wordCount, successRate }) {
           <View style={{flex:3}}>
             <Subheading style={styles.progress}>Progress</Subheading>
             <Divider />
-            <ProgressBar progress={0.8} color={Colors.greenA700} style={{marginTop:20}}/>
+            <ProgressBar progress={successRate/100} color={Colors.greenA700} style={{marginTop:20}}/>
           </View>
           <View style={{flex:2, paddingBottom: 20}}>
             <View>

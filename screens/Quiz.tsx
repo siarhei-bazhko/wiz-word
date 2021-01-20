@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Text } from "react-native";
 import { Button, Card, DataTable, Paragraph, TextInput, Title } from "react-native-paper";
 import { connect } from "react-redux";
 import { offlineUpdateStats, updateStats } from "../actions/wordsAction";
@@ -35,15 +35,18 @@ import { Word } from "../types/Word";
 
 
   checkWord(translation: string) {
-    const isCorrect = this.state.currentWord.translation === translation.trim().toLowerCase();
+    const isCorrect = this.state.currentWord.translation.trim().toLowerCase() === translation.trim().toLowerCase();
     const doneWord = Object.assign(this.state.currentWord, { isCorrect, userTranslation: translation });
-    this.setState((prev) => ({
-        doneWords: [...prev.doneWords, doneWord]
-      }))
+    this.setState(prev => {
+      console.log([...prev.doneWords, doneWord])
+
+      return {
+      doneWords: [...prev.doneWords, doneWord]
+    }}, this.popWord)
   }
 
   popWord() {
-    this.checkWord(this.state.translation);
+    // this.checkWord(this.state.translation);
 
     const remainWords = [...this.state.words];
     remainWords.pop();
@@ -56,12 +59,6 @@ import { Word } from "../types/Word";
     }))
 
     if(!remainWords.length) {
-      // const correctWords = this.state.doneWords.reduce(((acc, word)=>{
-      //   return word.isCorrect ? acc + 1 : acc
-      // }
-      // ), 0);
-      // const successRate = Math.round(correctWords / this.state.totalWordsCount * 100 *  10) / 10;
-
       const isOffline = this.props.network === NetworkSituation.OFFLINE
       || this.props.forcedOffline || this.props.energyOffline;
 
@@ -76,7 +73,12 @@ import { Word } from "../types/Word";
   render() {
     return (
     <View>
-    { this.state.doneWordsCount !== this.state.totalWordsCount ?
+    { !this.props.words.length
+      ? <View>
+          <Text style={{fontSize:24, textAlign:"center", paddingHorizontal: 10, paddingTop:20}}>Please add some words and start play!</Text>
+        </View>
+    :
+    this.state.doneWordsCount !== this.state.totalWordsCount ?
     <Card style={styles.cardContainer}>
       <Card.Content style={styles.cardStyle}>
         <Title style={styles.sourceWord}>{this.state.currentWord.origin}</Title>
@@ -91,7 +93,7 @@ import { Word } from "../types/Word";
     />
     <View style={styles.buttonsContainer}>
       <Button>Skip</Button>
-      <Button mode="contained" disabled={!this.state.translation} onPress={this.popWord}>OK</Button>
+      <Button mode="contained" disabled={!this.state.translation} onPress={()=>this.checkWord(this.state.translation)}>OK</Button>
     </View>
     </Card>
     :
