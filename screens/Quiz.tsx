@@ -72,7 +72,7 @@ import { Word } from "../types/Word";
 
   render() {
     return (
-    <View>
+    <View >
     { !this.props.words.length
       ? <View>
           <Text style={{fontSize:24, textAlign:"center", paddingHorizontal: 10, paddingTop:20}}>Please add some words and start play!</Text>
@@ -84,7 +84,7 @@ import { Word } from "../types/Word";
         <View style={{backgroundColor: "lightgreen", paddingHorizontal: 100, borderRadius: 10}}>
         <Paragraph style={styles.sourceWord}>{this.state.currentWord.origin}</Paragraph>
         </View>
-        <Paragraph style={{paddingTop: 20}}>Current word: {this.state.doneWordsCount + 1}/{this.state.totalWordsCount}</Paragraph>
+        <Paragraph style={{paddingTop: 20, fontStyle:"italic"}}>Current word: {this.state.doneWordsCount + 1}/{this.state.totalWordsCount}</Paragraph>
       </Card.Content>
     <TextInput
       style={styles.input}
@@ -128,15 +128,30 @@ import { Word } from "../types/Word";
 
 const styles = StyleSheet.create({
   cardContainer: {
-    marginVertical: 40,
-    marginHorizontal: 20,
+    marginVertical: 10,
+    // marginHorizontal: 20,
+
   },
   cardStyle: {
+    flexDirection:"column",
+    backgroundColor: "#d3d3d3",
+    margin:20,
+    borderRadius: 10,
     marginTop: 30,
     paddingVertical: 40,
-    alignItems: "center"
+    alignItems: "center",
+        shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.23,
+    shadowRadius: 2.62,
+
+    elevation: 4,
   },
   sourceWord: {
+    alignSelf:"center",
     paddingVertical: 20,
     fontSize: 20,
     fontWeight: "bold"

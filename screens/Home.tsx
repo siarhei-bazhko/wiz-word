@@ -21,7 +21,7 @@ class Home extends React.Component {
   render () {
   return (
     <View style={styles.outerContainer}>
-      <Text style={ this.props.isOffline? styles.infoBarOffline : styles.infoBarOnline }> {this.props.isOffline ? "Offline" : "Online" }</Text>
+     <Text style={ this.props.isOffline? styles.infoBarOffline : styles.infoBarOnline }> {this.props.isOffline ? "Offline" : "Online" }</Text>
       <WordDaily dailyWord={this.props.dailyWord}/>
       <Divider/>
       <View style={styles.buttonContainer}>
@@ -78,21 +78,14 @@ const mapStateToProps = (state: any) => {
                        || (state.situations.energy.energyOffline && !state.situations.forcedOffline)
                       //  || state.situations.energy.energyOffline
   const words = isOffline ? offlineWords : localWords;
-  const successRate = isOffline
-                      ? Math.round(offlineWords.reduce((acc, word : Word) => {
+  const successRate =  Math.round(words.reduce((acc, word : Word) => {
                         if(!word.totalRuns) {
                           return acc
                         }
                         acc += word.successRuns / word.totalRuns
                         return acc
-                        }, 0) / localWords.length * 100) * 100 / 100
-                      : Math.round(localWords.reduce((acc, word : Word) => {
-                        if(!word.totalRuns) {
-                          return acc
-                        }
-                        acc += word.successRuns / word.totalRuns
-                        return acc
-                        }, 0) / localWords.length * 100) * 100 / 100;
+                        }, 0) / words.length * 100) * 100 / 100;
+
   return {
     userToken: state.auth?.user?.userToken,
     isOffline,

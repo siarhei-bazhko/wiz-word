@@ -34,9 +34,18 @@ const styles = StyleSheet.create({
   card : {
     flex: 3,
     backgroundColor: "#d5f2e2",
-    marginHorizontal:20,
-    marginVertical: 20,
-    borderRadius: 10
+    marginHorizontal:15,
+    marginVertical: 15,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.23,
+    shadowRadius: 2.62,
+
+    elevation: 4,
   },
   wordOfTheDay : {
     fontSize: 16,

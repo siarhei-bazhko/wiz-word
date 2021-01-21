@@ -39,11 +39,11 @@ class SignIn extends React.Component {
   render() {
     return (
       <View style={{paddingTop: 30}}>
-        {/* <View >
+        <View >
           <Text style={styles.info}>Message: {this.props.message}</Text>
           <Text style={styles.info}>Pending Auth: {this.props.pendingAuth.toString()}</Text>
           <Text style={styles.info}>userToken: {this.props.userToken}</Text>
-        </View> */}
+        </View>
         <TextInput
           style={styles.input}
           label={"Username"}

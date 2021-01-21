@@ -43,10 +43,11 @@ class Words extends React.Component<WordsProps, Word[]> {
         }
         return Object.assign(word, { color })
       })
+      const comparator = (a,b) => (a.timestamp-b.timestamp);
       const green =words.filter(w => w.color === bestColor);
       const yellow =words.filter(w => w.color === averageColor);
       const rest = words.filter(w => w.color !== averageColor && w.color !== bestColor);
-      const sorted = [...green, ...yellow, ...rest];
+      const sorted = [...green.sort(comparator), ...yellow.sort(comparator), ...rest.sort(comparator)];
       console.log(sorted);
 
       return sorted.map((word, index) => (

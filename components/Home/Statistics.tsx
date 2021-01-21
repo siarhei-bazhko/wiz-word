@@ -11,55 +11,81 @@ export default function Statistics({ wordCount, successRate }) {
         </Headline>
         <View style={styles.outerContainer}>
           <View style={{flex:3}}>
-            <Subheading style={styles.progress}>Progress</Subheading>
-            <Divider />
-            <ProgressBar progress={successRate/100} color={Colors.greenA700} style={{marginTop:20}}/>
-          </View>
-          <View style={{flex:2, paddingBottom: 20}}>
-            <View>
-              <Subheading style={styles.wordCount}>Word count</Subheading>
+            <Subheading style={styles.progress}>progress</Subheading>
               <Divider />
+            <ProgressBar progress={successRate/100} color={Colors.green300} style={{marginTop:20, height: 20, borderRadius: 10}}/>
+          </View>
+          <View style={{flex:2, marginHorizontal: 10}}>
+            <View style={{flexDirection:"row", justifyContent:"space-between"}}>
+              <Subheading style={styles.wordCount}>word count</Subheading>
               <Text style={styles.wordNumbers}>{wordCount}</Text>
             </View>
-            <View>
-              <Subheading>Success Rate</Subheading>
-              <Divider />
+              <Divider/>
+            <View style={{flexDirection:"row", justifyContent:"space-between", marginTop: 20}}>
+              <Subheading  style={styles.successRate}>success rate</Subheading>
               <Text style={styles.successNumbers}>{successRate}%</Text>
             </View>
+              <Divider/>
           </View>
         </View>
     </Surface>
 }
 const styles = StyleSheet.create({
+  successRate: {
+    color: "black",
+    textAlign: "left",
+    fontFamily:"sans-serif-light"
+  },
+
   successNumbers: {
     color: "red",
     textAlign: "right",
     fontSize: 17,
-    fontWeight: "bold"
+    fontWeight: "bold",
+    alignSelf:"center",
+    fontFamily:"sans-serif-light"
   },
   wordNumbers: {
     color: "blue",
+    alignSelf:"center",
     textAlign: "right",
     fontSize: 17,
     fontWeight: "bold"
   },
   wordCount:{
-    paddingTop:20,
     color: "black",
-    textAlign: "left"
+    textAlign: "left",
+    fontFamily:"sans-serif-light"
   },
   headline: {
-    fontWeight: "600",
     textAlign: "center",
-    paddingTop: 10
+    paddingTop: 5,
+    fontSize: 15,
+    fontWeight: "bold",
+    paddingBottom: 6
+    ,
   },
   progress: {
     textAlign: "left",
-    fontSize: 19,
+    fontSize: 17,
+    fontFamily:"sans-serif-light",
+    paddingHorizontal: 5
   },
   surface: {
     flex: 8,
-    // padding: 20,
+    marginHorizontal: 15,
+    marginVertical: 10,
+    borderRadius: 10,
+    backgroundColor: "#cce3e6",
+        shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.23,
+    shadowRadius: 2.62,
+
+    elevation: 4,
 
   },
   outerContainer: {

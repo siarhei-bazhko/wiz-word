@@ -60,7 +60,7 @@ class InputsWrapper extends React.Component<InputWrapperProps, Word> {
   render() {
     const disabled = !this.state.origin || !this.state.translation
     return (
-      <View  >
+      <View style={{paddingBottom:  12}} >
         <View style={styles.linesWrapper}>
           <AddWordInput label="Origin" onChange={this.updateOriginInput} word={this.state.origin}/>
           <Button alignmentStyle={styles.buttonAlignment} buttonTitle="a-z" iconType="sort"/>
@@ -76,10 +76,11 @@ class InputsWrapper extends React.Component<InputWrapperProps, Word> {
 
 const styles = StyleSheet.create({
   linesWrapper: {
-    flexDirection: "row"
+    flexDirection: "row",
+
   },
   buttonWrapper: {
-    flexDirection: "row"
+    flexDirection: "row",
   },
   buttonAlignment: {
     flex:2,
