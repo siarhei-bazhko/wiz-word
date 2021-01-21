@@ -79,7 +79,13 @@ const mapStateToProps = (state: any) => {
                       //  || state.situations.energy.energyOffline
   const words = isOffline ? offlineWords : localWords;
   const successRate = isOffline
-                      ? state.offline.successRate
+                      ? Math.round(offlineWords.reduce((acc, word : Word) => {
+                        if(!word.totalRuns) {
+                          return acc
+                        }
+                        acc += word.successRuns / word.totalRuns
+                        return acc
+                        }, 0) / localWords.length * 100) * 100 / 100
                       : Math.round(localWords.reduce((acc, word : Word) => {
                         if(!word.totalRuns) {
                           return acc
@@ -90,11 +96,11 @@ const mapStateToProps = (state: any) => {
   return {
     userToken: state.auth?.user?.userToken,
     isOffline,
-    successRate,
+    successRate: isNaN(successRate) ? 0 : successRate,
     wordCount: words?.length,
     dailyWord: words?.length
                   ? words[daysIntoYear(new Date) % words.length]
-                  : { translation: "Sorry, you havent added anything yet",
+                  : { translation: "-",
                       origin: "Please, add some words"}
   }
 }

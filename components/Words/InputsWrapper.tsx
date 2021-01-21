@@ -52,8 +52,8 @@ class InputsWrapper extends React.Component<InputWrapperProps, Word> {
     this.props.addWord(word, this.props.userToken);
     this.setState({
       refId: generateWordId(),
-      // origin: "",
-      // translation: ""
+      origin: "",
+      translation: ""
     })
   }
 

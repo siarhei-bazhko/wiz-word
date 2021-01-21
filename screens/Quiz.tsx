@@ -60,7 +60,7 @@ import { Word } from "../types/Word";
 
     if(!remainWords.length) {
       const isOffline = this.props.network === NetworkSituation.OFFLINE
-      || this.props.forcedOffline || this.props.energyOffline;
+      || this.props.energyOffline;
 
       const fn = isOffline
         ? offlineUpdateStats(this.props.words, this.state.doneWords)

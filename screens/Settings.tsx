@@ -7,6 +7,7 @@ import firebase from "../config/firebase";
 import { setForcedOffline } from "../actions/adaptationAction";
 import { copyLocalState } from "../actions/wordsAction";
 import { NetworkSituation } from "../types/Adapation";
+import { store } from "../helpers";
 
 class Settings extends React.Component {
   constructor(props: any) {
@@ -61,7 +62,7 @@ class Settings extends React.Component {
           mode="contained"
           color="darkred"
           style={styles.buttonStyle}
-          disabled={!this.props.isOffline}
+          disabled={this.props.isOffline}
           onPress={() => this.handleSignOut()}>
           Sign Out
         </Button>
@@ -151,8 +152,9 @@ const mapDispatchToProps = (dispatch: Function) => ({
           console.log(err);
           dispatch(signOutFailure(err))
         });
-    dispatch(setForcedOffline(true))
-    dispatch(copyLocalState(localWords))
+    // dispatch(setForcedOffline(true))
+    // dispatch(copyLocalState(localWords))
+    // store.getState().offline.words = []
   },
 
   disableOfflineMode: (localWords) => {
@@ -161,7 +163,7 @@ const mapDispatchToProps = (dispatch: Function) => ({
   },
 
   enableOfflineMode: (localWords) => {
-    dispatch(setForcedOffline(true))
+    // dispatch(setForcedOffline(true))
     dispatch(copyLocalState(localWords))
   }
 

@@ -68,7 +68,7 @@ async function checkBatterySituation() {
         situation = BatterySituation.CHARGING
         break;
 
-      case batteryLevel > 0.10 && batteryLevel <= 0.70:
+      case batteryLevel > 0.10 && batteryLevel <= 0.75:
         situation = BatterySituation.MEDIUM_BATTERY
         // on init
         if(!store.getState().offline.words.length && !store.getState().words.words.length) {
