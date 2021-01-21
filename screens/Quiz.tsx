@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet, Text } from "react-native";
-import { Button, Card, DataTable, Paragraph, TextInput, Title } from "react-native-paper";
+import { Button, Card, DataTable, Divider, Paragraph, TextInput, Title } from "react-native-paper";
 import { connect } from "react-redux";
 import { offlineUpdateStats, updateStats } from "../actions/wordsAction";
 import { BatterySituation, NetworkSituation } from "../types/Adapation";
@@ -81,8 +81,10 @@ import { Word } from "../types/Word";
     this.state.doneWordsCount !== this.state.totalWordsCount ?
     <Card style={styles.cardContainer}>
       <Card.Content style={styles.cardStyle}>
-        <Title style={styles.sourceWord}>{this.state.currentWord.origin}</Title>
-        <Paragraph>{this.state.doneWordsCount + 1}/{this.state.totalWordsCount}</Paragraph>
+        <View style={{backgroundColor: "lightgreen", paddingHorizontal: 100, borderRadius: 10}}>
+        <Paragraph style={styles.sourceWord}>{this.state.currentWord.origin}</Paragraph>
+        </View>
+        <Paragraph style={{paddingTop: 20}}>Current word: {this.state.doneWordsCount + 1}/{this.state.totalWordsCount}</Paragraph>
       </Card.Content>
     <TextInput
       style={styles.input}
@@ -90,9 +92,9 @@ import { Word } from "../types/Word";
       value={this.state.translation}
       mode="outlined"
       onChangeText={this.handleInput}
-    />
+      />
     <View style={styles.buttonsContainer}>
-      <Button>Skip</Button>
+      <Button onPress={()=>this.checkWord("")}>Skip</Button>
       <Button mode="contained" disabled={!this.state.translation} onPress={()=>this.checkWord(this.state.translation)}>OK</Button>
     </View>
     </Card>
@@ -130,11 +132,14 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
   },
   cardStyle: {
+    marginTop: 30,
     paddingVertical: 40,
     alignItems: "center"
   },
   sourceWord: {
     paddingVertical: 20,
+    fontSize: 20,
+    fontWeight: "bold"
   },
   input: {
     padding: 20
