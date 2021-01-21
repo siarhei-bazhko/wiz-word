@@ -60,7 +60,7 @@ class SignIn extends React.Component {
 
         <Button alignmentStyle={styles.buttonAlignment} buttonTitle="SIGN UP" iconType="exit-run" fn={ () => this.props.navigation.navigate("SignUp")} args={this.state}/>
 
-        <Button alignmentStyle={styles.buttonAlignment} buttonTitle="I want use app offline" iconType="alien" fn={this.enableOfflineMode} args={this.state}></Button>
+        {/* <Button alignmentStyle={styles.buttonAlignment} buttonTitle="I want use app offline" iconType="alien" fn={this.enableOfflineMode} args={this.state}></Button> */}
       </View>
     );
   }

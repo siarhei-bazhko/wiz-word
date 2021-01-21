@@ -27,6 +27,9 @@ const updateWordStats = (words: Word[], quizWords: any) => {
 
   // compute success rate
   let successRate = localWords.reduce((acc, word : Word) => {
+    if(!word.totalRuns) {
+      return acc
+    }
     acc += word.successRuns / word.totalRuns
     return acc
   }, 0)

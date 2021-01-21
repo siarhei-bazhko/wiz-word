@@ -1,5 +1,7 @@
 import React from "react";
 import { View, StyleSheet, Text } from "react-native";
+import { Divider } from "react-native-paper";
+import { black } from "react-native-paper/lib/typescript/src/styles/colors";
 import { connect } from "react-redux";
 import { getFlashcards } from "../adaptations/proxy";
 import api from "../api/firebase";
@@ -21,13 +23,15 @@ class Home extends React.Component {
     <View style={styles.outerContainer}>
       <Text style={ this.props.isOffline? styles.infoBarOffline : styles.infoBarOnline }> {this.props.isOffline ? "Offline" : "Online" }</Text>
       <WordDaily dailyWord={this.props.dailyWord}/>
+      <Divider/>
       <View style={styles.buttonContainer}>
         <Button buttonTitle="Words" iconType="playlist-edit" fn={(arg:any)=>this.props.navigation.navigate(arg)} args="Words" />
         <Button buttonTitle="Play Quiz" iconType="play-circle" fn={(arg:any)=>this.props.navigation.navigate(arg)} args="Quiz" />
       </View>
+      <Divider/>
       <Statistics wordCount={this.props.wordCount} successRate={this.props.successRate}/>
       <View style={styles.buttonContainer}>
-        <Button buttonTitle="Share" iconType="share" fn={(arg:any)=>this.props.navigation.navigate(arg)} args="Share" />
+        <Button buttonTitle="Share" iconType="share" disabled={true} fn={(arg:any)=>this.props.navigation.navigate(arg)} args="Share" />
         <Button buttonTitle="Settings" iconType="settings" fn={(arg:any)=>this.props.navigation.navigate(arg)} args="Settings" />
       </View>
     </View>
@@ -42,11 +46,12 @@ const styles = StyleSheet.create(
       flex:1,
     },
     buttonContainer: {
+      borderColor: "black",
       flex:1,
       flexDirection: "row",
       justifyContent: "space-evenly",
       paddingTop: 20,
-      paddingBottom: 5
+      paddingBottom: 5,
     },
 
     infoBarOffline: {
@@ -76,10 +81,12 @@ const mapStateToProps = (state: any) => {
   const successRate = isOffline
                       ? state.offline.successRate
                       : Math.round(localWords.reduce((acc, word : Word) => {
+                        if(!word.totalRuns) {
+                          return acc
+                        }
                         acc += word.successRuns / word.totalRuns
                         return acc
                         }, 0) / localWords.length * 100) * 100 / 100;
-
   return {
     userToken: state.auth?.user?.userToken,
     isOffline,

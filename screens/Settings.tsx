@@ -30,17 +30,18 @@ class Settings extends React.Component {
 
   render() {
     return (
-      <View>
-        <View style={styles.infoBg}>
+      <View style={{paddingTop: 30}}>
+        {/* <View style={styles.infoBg}>
           <Text style={styles.info}>Message: {this.props.message instanceof String ? this.props.message : '-'}</Text>
           <Text style={styles.info}>Pending Auth: {this.props.pendingAuth.toString()}</Text>
           <Text style={styles.info}>userToken: {this.props?.userToken ? this.props.userToken : '-'}</Text>
-        </View>
+        </View> */}
         <Button
           icon="skull-outline"
           mode="contained"
           color="darkred"
           style={styles.buttonStyle}
+          disabled={true}
           onPress={() => console.log('Delete ALL words')}>
           Delete ALL words
         </Button>
@@ -50,6 +51,7 @@ class Settings extends React.Component {
           mode="contained"
           color="darkred"
           style={styles.buttonStyle}
+          disabled={true}
           onPress={() => console.log('Reset ALL statistics')}>
           Reset ALL statistics
         </Button>
@@ -59,10 +61,12 @@ class Settings extends React.Component {
           mode="contained"
           color="darkred"
           style={styles.buttonStyle}
+          disabled={!this.props.isOffline}
           onPress={() => this.handleSignOut()}>
           Sign Out
         </Button>
-
+      <View>
+        <Text style={{textAlign:"center", marginTop: 50, fontSize: 16, fontStyle:"italic"}}>Experimental features</Text>
         <Button
           icon="google-earth"
           mode="contained"
@@ -80,7 +84,7 @@ class Settings extends React.Component {
           onPress={() => {this.enableOfflineMode()}}>
           Ingore energy
         </Button>
-
+      </View>
       </View>
     );
   }
@@ -102,7 +106,7 @@ const styles = StyleSheet.create({
   },
 
   onlineButtonStyle: {
-    marginTop: 50,
+    marginTop: 10,
     marginHorizontal: 30
   },
 
@@ -129,6 +133,7 @@ const mapStateToProps = (state: any) => {
     pendingAuth: state?.auth?.user?.pendingAuth,
     userToken: state?.auth?.user?.userToken,
     words,
+    isOffline
 
 }
 }
