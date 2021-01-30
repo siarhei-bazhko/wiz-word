@@ -3,6 +3,7 @@ type Word = {
   // id: string,
   origin: string,
   translation: string,
+  dictionaryTranslation: string,
   timestamp: number,
   totalRuns: number,
   successRuns: number,
