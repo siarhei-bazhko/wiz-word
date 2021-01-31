@@ -11,12 +11,20 @@ import type { Word } from "../../types/Word";
 import { addFlashcard, getFlashcards } from '../../adaptations/proxy';
 import api from '../../api/firebase';
 import translateText from '../../api/dictionary'
+import { BatterySituation, NetworkSituation } from "../../types/Adapation"
+import { store } from "../../helpers/reduxStore";
+
 
 
 type InputWrapperProps = {
   addWord: Function,
   userToken: string
 }
+
+const network = store.getState().situations.offline.network;
+const energyOffline = store.getState().situations.energy.energyOffline;
+const isOffline = network === NetworkSituation.OFFLINE  || energyOffline;
+
 
 class InputsWrapper extends React.Component<InputWrapperProps, Word> {
   constructor(props: any) {
@@ -42,13 +50,17 @@ class InputsWrapper extends React.Component<InputWrapperProps, Word> {
       origin,
     })
 
-    //get transaltion from dictionary
+    console.log(network)
+    console.log(energyOffline)
+
+    //get translation from dictionary
+   if (!isOffline){
     var self = this;
     translateText(origin)
       .then(trans => {
         self.setState({ dictionaryTranslation: trans });
       });
-
+    }
 
   }
 
@@ -72,7 +84,12 @@ class InputsWrapper extends React.Component<InputWrapperProps, Word> {
     word.origin = word.origin.toLowerCase();
     word.translation = word.translation.toLowerCase();
     word.timestamp = Date.now();
-    this.props.addWord(word, this.props.userToken);
+    
+    const newWord = JSON.parse(JSON.stringify(word))
+    delete newWord.dictionaryTranslation
+
+    this.props.addWord(newWord, this.props.userToken);
+
     this.setState({
       refId: generateWordId(),
       origin: "",
@@ -82,7 +99,8 @@ class InputsWrapper extends React.Component<InputWrapperProps, Word> {
 
   render() {
     const disabled = !this.state.origin || !this.state.translation
-    const disabledDictionary = !this.state.origin;
+    const disabledDictionary = !this.state.origin || isOffline;
+    //const disabledDictionary = !this.state.origin
     return (
       <View style={{ paddingBottom: 12 }} >
         <View style={styles.linesWrapper}>

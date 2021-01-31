@@ -1,3 +1,4 @@
+import { auth } from "firebase";
 import firebase from "../config/firebase";
 import { Word } from "../types/Word";
 
@@ -17,6 +18,11 @@ function api(userId: string) {
       console.log(err);
       return  Promise.reject({ msg: `Cannot add word ${flashcard} to db :(`})
     }
+  }
+
+  async function signOut() {
+    auth().signOut()
+    .then(() => console.log('User signed out!'));  
   }
 
   async function getFlashcards() {
@@ -86,7 +92,7 @@ function api(userId: string) {
     }
   }
 
-  return { addFlashcard, getFlashcards, deleteFlashcard, syncOfflineWithServer, updateStats };
+  return { addFlashcard, getFlashcards, deleteFlashcard, syncOfflineWithServer, updateStats, signOut };
 }
 
 export default api;

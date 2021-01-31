@@ -8,6 +8,7 @@ import { setForcedOffline } from "../actions/adaptationAction";
 import { copyLocalState } from "../actions/wordsAction";
 import { NetworkSituation } from "../types/Adapation";
 import { store } from "../helpers";
+import api from "../api/firebase"
 
 class Settings extends React.Component {
   constructor(props: any) {
@@ -27,6 +28,8 @@ class Settings extends React.Component {
 
   handleSignOut() {
     this.props.handleSignOut(this.props.words)
+    const token = store.getState().auth.user.userToken;
+    api(token).signOut();
   }
 
   render() {
