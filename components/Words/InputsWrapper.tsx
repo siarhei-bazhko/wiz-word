@@ -21,12 +21,9 @@ type InputWrapperProps = {
   userToken: string
 }
 
-const network = store.getState().situations.offline.network;
-const energyOffline = store.getState().situations.energy.energyOffline;
-const isOffline = network === NetworkSituation.OFFLINE  || energyOffline;
-
-
 class InputsWrapper extends React.Component<InputWrapperProps, Word> {
+
+
   constructor(props: any) {
     super(props);
     this.state = {
@@ -50,9 +47,10 @@ class InputsWrapper extends React.Component<InputWrapperProps, Word> {
       origin,
     })
 
-    console.log(network)
-    console.log(energyOffline)
-
+    const network = store.getState().situations.offline.network;
+    const energyOffline = store.getState().situations.energy.energyOffline;
+    const isOffline = network === NetworkSituation.OFFLINE  || energyOffline;
+    
     //get translation from dictionary
    if (!isOffline){
     var self = this;
@@ -99,7 +97,13 @@ class InputsWrapper extends React.Component<InputWrapperProps, Word> {
 
   render() {
     const disabled = !this.state.origin || !this.state.translation
+
+    const network = store.getState().situations.offline.network;
+    const energyOffline = store.getState().situations.energy.energyOffline;
+    const isOffline = network === NetworkSituation.OFFLINE  || energyOffline;
+
     const disabledDictionary = !this.state.origin || isOffline;
+
     //const disabledDictionary = !this.state.origin
     return (
       <View style={{ paddingBottom: 12 }} >
