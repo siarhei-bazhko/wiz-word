@@ -20,11 +20,6 @@ function api(userId: string) {
     }
   }
 
-  async function signOut() {
-    auth().signOut()
-    .then(() => console.log('User signed out!'));  
-  }
-
   async function getFlashcards() {
     const flashcards: any[] = [];
     try {
@@ -92,7 +87,64 @@ function api(userId: string) {
     }
   }
 
-  return { addFlashcard, getFlashcards, deleteFlashcard, syncOfflineWithServer, updateStats, signOut };
+  async function  deleteAllFlashcards() {
+    try {
+      const flashcardsSnapshot = await fs.collection("users").doc(userId).collection("flashcards");
+      console.log(flashcardsSnapshot);
+      const query = flashcardsSnapshot.orderBy('origin').limit(3);
+
+      return new Promise((resolve, reject) => {
+        deleteWordsBatch(fs, query, resolve).catch(reject);
+      });
+    } catch (error) {
+      // TODO: handle
+      console.log(error);
+      return  Promise.reject({ msg: "Couldn't delete the words :("})
+    }
+  }
+
+  async function deleteWordsBatch(db, query, resolve) {
+    const snapshot = await query.get();
+  
+    const batchSize = snapshot.size;
+    if (batchSize === 0) {
+      // When there are no documents left, we are done
+      resolve();
+      return { msg: `Successfully deleted all flashcards`}
+    }
+  
+    // Delete documents in a batch
+    const batch = db.batch();
+    snapshot.docs.forEach((doc) => {
+      console.log(doc.ref);
+      batch.delete(doc.ref);
+    });
+    await batch.commit();
+  
+    // Recurse on the next process tick, to avoid
+    // exploding the stack.
+    process.nextTick(() => {
+      deleteWordsBatch(db, query, resolve);
+    });
+  }
+
+  async function deleteStats(words) {
+    try {
+      const batch = fs.batch();
+      words.forEach(word => {
+      const ref = fs.collection("users").doc(userId).collection("flashcards").doc(word.refId);
+      word.successRuns = 0;
+      word.totalRuns = 0;
+      batch.update(ref, word)
+      })
+      await batch.commit()
+      return words
+    } catch(err) {
+      console.log(err);
+    }
+  }
+
+  return { addFlashcard, getFlashcards, deleteFlashcard, syncOfflineWithServer, updateStats, deleteAllFlashcards, deleteStats };
 }
 
 export default api;

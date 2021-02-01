@@ -5,7 +5,7 @@ import { signOutFailure, signOutRequest, signOutSuccess } from "../actions/authe
 import { Button } from 'react-native-paper';
 import firebase from "../config/firebase";
 import { setForcedOffline } from "../actions/adaptationAction";
-import { copyLocalState } from "../actions/wordsAction";
+import { copyLocalState, getWordsSuccess } from "../actions/wordsAction";
 import { NetworkSituation } from "../types/Adapation";
 import { store } from "../helpers";
 import api from "../api/firebase"
@@ -16,6 +16,8 @@ class Settings extends React.Component {
 
     this.enableOfflineMode = this.enableOfflineMode.bind(this)
     this.disableOfflineMode = this.disableOfflineMode.bind(this)
+    this.handleDeleteStats = this.handleDeleteStats.bind(this)
+    this.handleDeleteWords = this.handleDeleteWords.bind(this)
   }
 
   enableOfflineMode() {
@@ -28,13 +30,23 @@ class Settings extends React.Component {
 
   handleSignOut() {
     this.props.handleSignOut(this.props.words)
+  }
+
+  async handleDeleteWords() {
     const token = store.getState().auth.user.userToken;
-    api(token).signOut();
+    await api(token).deleteAllFlashcards();
+    this.props.handleDeleteWords([])
+  }
+
+  async handleDeleteStats() {
+    const token = store.getState().auth.user.userToken;
+    const newWords = await api(token).deleteStats(this.props.words);
+    this.props.handleDeleteStats(newWords)
   }
 
   render() {
     return (
-      <View style={{paddingTop: 30}}>
+      <View style={{ paddingTop: 30 }}>
         {/* <View style={styles.infoBg}>
           <Text style={styles.info}>Message: {this.props.message instanceof String ? this.props.message : '-'}</Text>
           <Text style={styles.info}>Pending Auth: {this.props.pendingAuth.toString()}</Text>
@@ -45,8 +57,8 @@ class Settings extends React.Component {
           mode="contained"
           color="darkred"
           style={styles.buttonStyle}
-          disabled={true}
-          onPress={() => console.log('Delete ALL words')}>
+          disabled={this.props.isOffline}
+          onPress={() => this.handleDeleteWords()}>
           Delete ALL words
         </Button>
 
@@ -55,8 +67,8 @@ class Settings extends React.Component {
           mode="contained"
           color="darkred"
           style={styles.buttonStyle}
-          disabled={true}
-          onPress={() => console.log('Reset ALL statistics')}>
+          disabled={this.props.isOffline}
+          onPress={() => this.handleDeleteStats()}>
           Reset ALL statistics
         </Button>
 
@@ -69,26 +81,26 @@ class Settings extends React.Component {
           onPress={() => this.handleSignOut()}>
           Sign Out
         </Button>
-      <View>
-        <Text style={{textAlign:"center", marginTop: 50, fontSize: 16, fontStyle:"italic"}}>Experimental features</Text>
-        <Button
-          icon="google-earth"
-          mode="contained"
-          color="green"
-          style={styles.onlineButtonStyle}
-          onPress={() => this.disableOfflineMode()}>
-          Not ignore energy
+        <View>
+          <Text style={{ textAlign: "center", marginTop: 50, fontSize: 16, fontStyle: "italic" }}>Experimental features</Text>
+          <Button
+            icon="google-earth"
+            mode="contained"
+            color="green"
+            style={styles.onlineButtonStyle}
+            onPress={() => this.disableOfflineMode()}>
+            Not ignore energy
         </Button>
 
-        <Button
-          icon="alien"
-          mode="contained"
-          color="red"
-          style={styles.offlineButtonStyle}
-          onPress={() => {this.enableOfflineMode()}}>
-          Ingore energy
+          <Button
+            icon="alien"
+            mode="contained"
+            color="red"
+            style={styles.offlineButtonStyle}
+            onPress={() => { this.enableOfflineMode() }}>
+            Ingore energy
         </Button>
-      </View>
+        </View>
       </View>
     );
   }
@@ -100,7 +112,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: 10,
   },
-  infoBg : {
+  infoBg: {
     marginVertical: 30,
     backgroundColor: "lightgrey"
   },
@@ -126,11 +138,11 @@ const styles = StyleSheet.create({
 });
 
 const mapStateToProps = (state: any) => {
-    // TODO: refactor (ifce)
+  // TODO: refactor (ifce)
   const localWords = state?.words?.words ? state.words.words : [];
   const offlineWords = state.offline.words
   const isOffline = state.situations.offline.network === NetworkSituation.OFFLINE
-                       || (state.situations.energy.energyOffline && !state.situations.forcedOffline)
+    || (state.situations.energy.energyOffline && !state.situations.forcedOffline)
   const words = isOffline ? offlineWords : localWords;
   return {
     message: state?.auth?.user?.authMessage,
@@ -139,7 +151,7 @@ const mapStateToProps = (state: any) => {
     words,
     isOffline
 
-}
+  }
 }
 
 const mapDispatchToProps = (dispatch: Function) => ({
@@ -147,14 +159,14 @@ const mapDispatchToProps = (dispatch: Function) => ({
     dispatch(signOutRequest());
     firebase.auth()
       .signOut()
-        .then((res)=>{
-          console.log(res);
-          dispatch(signOutSuccess(res))
-        })
-        .catch((err)=> {
-          console.log(err);
-          dispatch(signOutFailure(err))
-        });
+      .then((res) => {
+        console.log(res);
+        dispatch(signOutSuccess(res))
+      })
+      .catch((err) => {
+        console.log(err);
+        dispatch(signOutFailure(err))
+      });
     // dispatch(setForcedOffline(true))
     // dispatch(copyLocalState(localWords))
     // store.getState().offline.words = []
@@ -168,8 +180,15 @@ const mapDispatchToProps = (dispatch: Function) => ({
   enableOfflineMode: (localWords) => {
     // dispatch(setForcedOffline(true))
     dispatch(copyLocalState(localWords))
-  }
+  },
 
+  handleDeleteStats: (localWords) => {
+    dispatch(getWordsSuccess(localWords))
+  },
+
+  handleDeleteWords: (localWords) => {
+    dispatch(getWordsSuccess(localWords))
+  }
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Settings)
