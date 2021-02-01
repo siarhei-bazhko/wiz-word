@@ -50,7 +50,7 @@ class InputsWrapper extends React.Component<InputWrapperProps, Word> {
       origin
     })
 
-    if (this.state.language && this.state.language !== "default") {
+    if (this.state.language && this.state.language !== "default" && origin) {
       this.dictionaryCall(origin, this.state.language);
     }
   }
@@ -91,7 +91,7 @@ class InputsWrapper extends React.Component<InputWrapperProps, Word> {
       language
     })
 
-    if (this.state.language && this.state.language !== "default") {
+    if (language && language !== "default" && this.state.origin) {
       this.dictionaryCall(this.state.origin, language);
     }
   }
