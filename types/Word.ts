@@ -4,6 +4,7 @@ type Word = {
   origin: string,
   translation: string,
   dictionaryTranslation: string,
+  language: string,
   timestamp: number,
   totalRuns: number,
   successRuns: number,

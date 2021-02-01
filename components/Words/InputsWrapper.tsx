@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Picker } from "react-native";
 
 import AddWordInput from "./AddWordInput";
 import Button from "../Home/Button";
@@ -31,6 +31,7 @@ class InputsWrapper extends React.Component<InputWrapperProps, Word> {
       origin: "",
       translation: "",
       dictionaryTranslation: "",
+      language: "",
       totalRuns: 0,
       successRuns: 0,
     }
@@ -39,27 +40,35 @@ class InputsWrapper extends React.Component<InputWrapperProps, Word> {
     this.updateTranslationInput = this.updateTranslationInput.bind(this);
     this.addWord = this.addWord.bind(this);
     this.addDictionaryTranslation = this.addDictionaryTranslation.bind(this);
+    this.updateLanguage = this.updateLanguage.bind(this);
+
   }
 
   updateOriginInput(origin: string) {
 
     this.setState({
-      origin,
+      origin
     })
 
+    if (this.state.language) {
+      this.dictionaryCall(origin, this.state.language);
+    }
+  }
+
+  dictionaryCall(word: string, language: string) {
+    console.log("call2")
     const network = store.getState().situations.offline.network;
     const energyOffline = store.getState().situations.energy.energyOffline;
-    const isOffline = network === NetworkSituation.OFFLINE  || energyOffline;
-    
-    //get translation from dictionary
-   if (!isOffline){
-    var self = this;
-    translateText(origin)
-      .then(trans => {
-        self.setState({ dictionaryTranslation: trans });
-      });
-    }
+    const isOffline = network === NetworkSituation.OFFLINE || energyOffline;
 
+    //get translation from dictionary
+    if (!isOffline) {
+      var self = this;
+      translateText(word, language)
+        .then(trans => {
+          self.setState({ dictionaryTranslation: trans });
+        });
+    }
   }
 
   updateTranslationInput(translation: string) {
@@ -78,13 +87,25 @@ class InputsWrapper extends React.Component<InputWrapperProps, Word> {
 
   }
 
+  updateLanguage(language: string) {
+    this.setState({
+      language
+    })
+
+    if (this.state.origin) {
+      this.dictionaryCall(this.state.origin, language);
+    }
+  }
+
+
   addWord(word: Word) {
     word.origin = word.origin.toLowerCase();
     word.translation = word.translation.toLowerCase();
     word.timestamp = Date.now();
-    
+
     const newWord = JSON.parse(JSON.stringify(word))
     delete newWord.dictionaryTranslation
+    delete newWord.language
 
     this.props.addWord(newWord, this.props.userToken);
 
@@ -100,11 +121,10 @@ class InputsWrapper extends React.Component<InputWrapperProps, Word> {
 
     const network = store.getState().situations.offline.network;
     const energyOffline = store.getState().situations.energy.energyOffline;
-    const isOffline = network === NetworkSituation.OFFLINE  || energyOffline;
+    const isOffline = network === NetworkSituation.OFFLINE || energyOffline;
 
-    const disabledDictionary = !this.state.origin || isOffline;
+    const disabledDictionary = !this.state.origin || isOffline || !this.state.language;
 
-    //const disabledDictionary = !this.state.origin
     return (
       <View style={{ paddingBottom: 12 }} >
         <View style={styles.linesWrapper}>
@@ -116,11 +136,35 @@ class InputsWrapper extends React.Component<InputWrapperProps, Word> {
           <Button alignmentStyle={styles.buttonAlignment} buttonTitle="Add" iconType="check" fn={this.addWord} args={this.state} disabled={disabled} />
         </View>
 
-        <View style={disabledDictionary ? styles.hidden : styles.linesWrapper}>
-          <Button buttonTitle={"Suggested translation: " + this.state.dictionaryTranslation} args={this.state.dictionaryTranslation} fn={this.addDictionaryTranslation}>
-          </Button>
+        <View style={styles.container}>
+
+          <View style={styles.dictionary}>
+            <View style={disabledDictionary ? styles.hidden : styles.dictionary
+            }>
+              <Button buttonTitle={"Suggestion: " + this.state.dictionaryTranslation} args={this.state.dictionaryTranslation} fn={this.addDictionaryTranslation}>
+              </Button>
+            </View>
+          </View>
+
+          <View style={isOffline ? styles.hidden : styles.selector}>
+
+            <Picker
+              style={{ height: 50 }}
+              selectedValue={this.state.language}
+              onValueChange={this.updateLanguage}
+            >
+              <Picker.Item label="Arabic" value="ar" />
+              <Picker.Item label="Bulgarian" value="bg" />
+              <Picker.Item label="Chinese" value="zh-Hans" />
+              <Picker.Item label="Croatian" value="hr" />
+              <Picker.Item label="Czech" value="cs" />
+              <Picker.Item label="Dutch" value="nl" />
+              <Picker.Item label="French" value="fr" />
+              <Picker.Item label="German" value="de" />
+            </Picker>
+          </View>
         </View>
-      </View> 
+      </View>
     );
   }
 }
@@ -138,7 +182,26 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   hidden: {
-   display: "none"
+    display: "none"
+  },
+  dictionary: {
+    flex: 10,
+    paddingLeft: 10,
+    paddingTop: 5,
+  },
+  selector: {
+    alignSelf: "center",
+    flex: 2,
+    width: 100,
+    height: 50,
+    paddingRight: 10, paddingLeft: 10,
+
+    paddingTop: 5,
+  },
+  container: {
+    flexGrow: 1,
+    flexDirection: "row",
+    flexWrap: "wrap"
   }
 });
 
