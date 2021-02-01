@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, Text } from "react-native";
+import { View, StyleSheet, Text , Share} from "react-native";
 import { Divider } from "react-native-paper";
 import { black } from "react-native-paper/lib/typescript/src/styles/colors";
 import { connect } from "react-redux";
@@ -18,6 +18,29 @@ class Home extends React.Component {
     getFlashcards(this.props.dispatch, this.props.userToken);
   }
 
+  onShare = async () => {
+    try {
+      const expoLink = 'https://expo.io/@gajdini/projects/wiz-word'
+      const result = await Share.share({
+        message:
+        'Hello! I have added ' + this.props.wordCount + ' words to WizWord and my quiz success rate is ' + this.props.successRate +'!\n' +
+        'Join me:  ' + expoLink
+      });
+
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          // shared with activity type of result.activityType
+        } else {
+          // shared
+        }
+      } else if (result.action === Share.dismissedAction) {
+        // dismissed
+      }
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
   render () {
   return (
     <View style={styles.outerContainer}>
@@ -31,7 +54,7 @@ class Home extends React.Component {
       <Divider/>
       <Statistics wordCount={this.props.wordCount} successRate={this.props.successRate}/>
       <View style={styles.buttonContainer}>
-        <Button buttonTitle="Share" iconType="share" disabled={true} fn={(arg:any)=>this.props.navigation.navigate(arg)} args="Share" />
+        <Button buttonTitle="Share" iconType="share" disabled={this.props.isOffline} fn={this.onShare}/>
         <Button buttonTitle="Settings" iconType="settings" fn={(arg:any)=>this.props.navigation.navigate(arg)} args="Settings" />
       </View>
     </View>
