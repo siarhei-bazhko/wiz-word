@@ -31,7 +31,7 @@ class InputsWrapper extends React.Component<InputWrapperProps, Word> {
       origin: "",
       translation: "",
       dictionaryTranslation: "",
-      language: "",
+      language: "default",
       totalRuns: 0,
       successRuns: 0,
     }
@@ -50,13 +50,12 @@ class InputsWrapper extends React.Component<InputWrapperProps, Word> {
       origin
     })
 
-    if (this.state.language) {
+    if (this.state.language && this.state.language !== "default") {
       this.dictionaryCall(origin, this.state.language);
     }
   }
 
   dictionaryCall(word: string, language: string) {
-    console.log("call2")
     const network = store.getState().situations.offline.network;
     const energyOffline = store.getState().situations.energy.energyOffline;
     const isOffline = network === NetworkSituation.OFFLINE || energyOffline;
@@ -92,7 +91,7 @@ class InputsWrapper extends React.Component<InputWrapperProps, Word> {
       language
     })
 
-    if (this.state.origin) {
+    if (this.state.language && this.state.language !== "default") {
       this.dictionaryCall(this.state.origin, language);
     }
   }
@@ -123,7 +122,7 @@ class InputsWrapper extends React.Component<InputWrapperProps, Word> {
     const energyOffline = store.getState().situations.energy.energyOffline;
     const isOffline = network === NetworkSituation.OFFLINE || energyOffline;
 
-    const disabledDictionary = !this.state.origin || isOffline || !this.state.language;
+    const disabledDictionary = !this.state.origin || isOffline || !this.state.language || this.state.language === "default";
 
     return (
       <View style={{ paddingBottom: 12 }} >
@@ -149,18 +148,37 @@ class InputsWrapper extends React.Component<InputWrapperProps, Word> {
           <View style={isOffline ? styles.hidden : styles.selector}>
 
             <Picker
-              style={{ height: 50 }}
+              style={{ height: 50, width:110 }}
               selectedValue={this.state.language}
               onValueChange={this.updateLanguage}
             >
+              <Picker.Item label="Select" value="default" />
               <Picker.Item label="Arabic" value="ar" />
               <Picker.Item label="Bulgarian" value="bg" />
               <Picker.Item label="Chinese" value="zh-Hans" />
               <Picker.Item label="Croatian" value="hr" />
               <Picker.Item label="Czech" value="cs" />
+              <Picker.Item label="Danish" value="da" />
               <Picker.Item label="Dutch" value="nl" />
+              <Picker.Item label="Filipino" value="fil" />
+              <Picker.Item label="Finnish" value="fi" />
               <Picker.Item label="French" value="fr" />
               <Picker.Item label="German" value="de" />
+              <Picker.Item label="Greek" value="el" />
+              <Picker.Item label="Hungarian" value="hu" />
+              <Picker.Item label="Italian" value="it" />
+              <Picker.Item label="Japanese" value="ja" />
+              <Picker.Item label="Kazakh" value="kk" />
+              <Picker.Item label="Korean" value="ko" />
+              <Picker.Item label="Norwegian" value="nb" />
+              <Picker.Item label="Polish" value="pl" />
+              <Picker.Item label="Portuguese" value="pt" />
+              <Picker.Item label="Russian" value="ru" />
+              <Picker.Item label="Spanish" value="es" />
+              <Picker.Item label="Swedish" value="sv" />
+              <Picker.Item label="Thai" value="th" />
+              <Picker.Item label="Turkish" value="tr" />
+              <Picker.Item label="Vietnamese" value="vi" />
             </Picker>
           </View>
         </View>
@@ -188,11 +206,11 @@ const styles = StyleSheet.create({
     flex: 10,
     paddingLeft: 10,
     paddingTop: 5,
+    alignSelf: "flex-start"
   },
   selector: {
     alignSelf: "center",
-    flex: 2,
-    width: 100,
+    flex: 3,
     height: 50,
     paddingRight: 10, paddingLeft: 10,
 
